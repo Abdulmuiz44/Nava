@@ -1,0 +1,22 @@
+name: "GitHub Login Workflow"
+description: "Log in to GitHub and take a screenshot"
+browser: chrome
+headless: false
+timeout: 30
+retries: 2
+
+variables:
+  email: "user@example.com"
+  password: "your_password"
+
+tasks:
+  - "go to https://github.com"
+  - "click on 'Sign in'"
+  - "wait for input[name=login]"
+  - "fill input[name=login] with {email}"
+  - "fill input[name=password] with {password}"
+  - "press Enter"
+  - "wait for '.Header-link--profile'"
+  - "take screenshot"
+
+screenshot: "github_login.png"

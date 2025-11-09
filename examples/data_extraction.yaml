@@ -1,0 +1,16 @@
+name: "Data Extraction Workflow"
+description: "Extract trending repos from GitHub"
+browser: chromium
+headless: true
+timeout: 60
+retries: 3
+
+tasks:
+  - "go to https://github.com/trending"
+  - "wait for '.Box-row'"
+  - "extract all links from current"
+  - "take screenshot"
+
+webhook: "https://webhook.example.com/results"
+db_connection: "postgresql://user:pass@localhost/automation_db"
+s3_bucket: "automation-results"

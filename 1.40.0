@@ -1,0 +1,15 @@
+Collecting playwright
+  Using cached playwright-1.55.0-py3-none-win_amd64.whl.metadata (3.5 kB)
+Collecting pyee<14,>=13 (from playwright)
+  Using cached pyee-13.0.0-py3-none-any.whl.metadata (2.9 kB)
+Collecting greenlet<4.0.0,>=3.1.1 (from playwright)
+  Downloading greenlet-3.2.4-cp314-cp314-win_amd64.whl.metadata (4.2 kB)
+Collecting typing-extensions (from pyee<14,>=13->playwright)
+  Using cached typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+Using cached playwright-1.55.0-py3-none-win_amd64.whl (35.5 MB)
+Downloading greenlet-3.2.4-cp314-cp314-win_amd64.whl (303 kB)
+Using cached pyee-13.0.0-py3-none-any.whl (15 kB)
+Using cached typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+Installing collected packages: typing-extensions, greenlet, pyee, playwright
+
+Successfully installed greenlet-3.2.4 playwright-1.55.0 pyee-13.0.0 typing-extensions-4.15.0

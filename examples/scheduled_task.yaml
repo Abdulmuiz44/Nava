@@ -1,0 +1,13 @@
+name: "Scheduled Website Monitor"
+description: "Check website status every 5 minutes"
+browser: chrome
+headless: true
+
+tasks:
+  - "go to https://example.com"
+  - "wait for 'body'"
+  - "extract headings from current"
+  - "take screenshot"
+
+# Schedule: every 5 minutes (use --schedule flag when running)
+# Slack notifications: use --slack flag when running
