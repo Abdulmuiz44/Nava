@@ -288,7 +288,7 @@ py -m playwright install chromium
 **Import errors**
 ```powershell
 # Ensure you're in the project directory
-cd Browsing_Agent
+cd Nava
 python main.py
 # OR:
 py main.py
