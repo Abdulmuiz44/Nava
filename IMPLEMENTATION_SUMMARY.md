@@ -1,4 +1,4 @@
-# Browsing Agent Pro - Implementation Summary
+# Nava Pro - Implementation Summary
 
 ## ✅ All 13 Features Implemented
 
@@ -278,7 +278,7 @@ Features:
 ## 📁 Project Structure
 
 ```
-Browsing_Agent/
+Nava/
 ├── main.py                 # Entry point
 ├── cli.py                  # Advanced CLI (2.0)
 ├── browser.py              # Browser session management

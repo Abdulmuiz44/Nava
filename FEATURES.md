@@ -1,4 +1,4 @@
-# Browsing Agent Pro - Feature Guide
+# Nava Pro - Feature Guide
 
 ## 🎯 Core Features
 

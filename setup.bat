@@ -1,8 +1,8 @@
 @echo off
-REM Setup script for Browsing Agent on Windows
+REM Setup script for Nava on Windows
 
 echo ========================================
-echo    Browsing Agent Setup for Windows
+echo    Nava Setup for Windows
 echo ========================================
 echo.
 
@@ -66,7 +66,7 @@ echo ========================================
 echo        Setup Complete! 
 echo ========================================
 echo.
-echo You can now use the Browsing Agent:
+echo You can now use Nava:
 echo.
 echo   run.bat "go to https://github.com"
 echo   run.bat "search for python tutorials"

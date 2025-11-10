@@ -1,4 +1,4 @@
-# 🌐 Browsing Agent Pro - Advanced Browser Automation
+# 🌐 Nava Pro - Advanced Browser Automation
 
 **Transform web interactions into automations with natural language commands.**
 
@@ -418,20 +418,20 @@ CMD ["py", "main.py", "--api", "--host", "0.0.0.0"]
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: browsing-agent
+  name: nava
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: browsing-agent
+      app: nava
   template:
     metadata:
       labels:
-        app: browsing-agent
+        app: nava
     spec:
       containers:
       - name: agent
-        image: browsing-agent:latest
+        image: nava:latest
         ports:
         - containerPort: 8000
         env:

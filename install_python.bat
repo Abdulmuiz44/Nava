@@ -1,6 +1,6 @@
 @echo off
 echo ============================================================
-echo     PYTHON INSTALLATION GUIDE FOR BROWSING AGENT
+echo     PYTHON INSTALLATION GUIDE FOR NAVA
 echo ============================================================
 echo.
 echo STEP 1: Download and Install Python
@@ -23,7 +23,7 @@ echo   py --version
 echo.
 echo You should see: Python 3.12.x
 echo.
-echo STEP 3: Install Browsing Agent Requirements
+echo STEP 3: Install Nava Requirements
 echo ------------------------------------------
 echo Once Python is installed, run this file again
 echo and it will automatically install all requirements!
@@ -91,7 +91,7 @@ echo ============================================================
 echo               INSTALLATION COMPLETE!
 echo ============================================================
 echo.
-echo You can now use the Browsing Agent:
+echo You can now use Nava:
 echo.
 echo   %PYTHON_CMD% main.py "go to https://github.com"
 echo   %PYTHON_CMD% main.py "search for python tutorials"

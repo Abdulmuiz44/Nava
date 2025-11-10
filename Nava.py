@@ -1,4 +1,4 @@
-"""Main browsing agent class that orchestrates browser automation tasks."""
+"""Main Nava agent class that orchestrates browser automation tasks."""
 
 import asyncio
 import logging
@@ -8,7 +8,7 @@ from browser import BrowserConfig, BrowserSession
 from task_executor import execute_task, TaskResult
 
 
-class BrowsingAgent:
+class Nava:
     """High-level interface for browser automation tasks."""
     
     def __init__(self, config: Optional[BrowserConfig] = None):
@@ -34,7 +34,7 @@ class BrowsingAgent:
 
 
 def main() -> int:
-    """Entry point for running the browsing agent."""
+    """Entry point for running the Nava agent."""
     import sys
     from cli import main as cli_main
     return cli_main(sys.argv[1:])

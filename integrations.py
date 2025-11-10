@@ -72,7 +72,7 @@ class SlackIntegration:
                     "color": colors.get(status, colors["info"]),
                     "title": title,
                     "text": message,
-                    "footer": "Browsing Agent",
+                    "footer": "Nava",
                 }
             ]
         }

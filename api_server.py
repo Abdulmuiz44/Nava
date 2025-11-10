@@ -67,7 +67,7 @@ class APIServer:
         self.host = host
         self.port = port
         self.app = FastAPI(
-            title="Browsing Agent API",
+            title="Nava API",
             description="Remote browser automation API",
             version="1.0.0",
         )
@@ -79,7 +79,7 @@ class APIServer:
 
         @self.app.get("/health")
         async def health():
-            return {"status": "healthy", "service": "Browsing Agent API"}
+            return {"status": "healthy", "service": "Nava API"}
 
         @self.app.post("/execute", response_model=TaskResponse)
         async def execute_task_endpoint(request: TaskRequest):

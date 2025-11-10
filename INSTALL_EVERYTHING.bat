@@ -2,7 +2,7 @@
 cls
 echo.
 echo ================================================================
-echo                 PYTHON INSTALLATION FOR BROWSING AGENT
+echo                 PYTHON INSTALLATION FOR NAVA
 echo ================================================================
 echo.
 echo I'll help you install Python! Here are your options:
@@ -72,7 +72,7 @@ exit /b 1
 
 :install_requirements
 echo.
-echo Python found! Installing Browsing Agent requirements...
+echo Python found! Installing Nava requirements...
 echo.
 
 echo Step 1/3: Installing Playwright...
@@ -114,7 +114,7 @@ echo.
 echo Python version:
 %PYTHON_CMD% --version
 echo.
-echo You can now use the Browsing Agent with these commands:
+echo You can now use Nava with these commands:
 echo.
 echo   %PYTHON_CMD% main.py "go to https://github.com"
 echo   %PYTHON_CMD% main.py "search for python tutorials"

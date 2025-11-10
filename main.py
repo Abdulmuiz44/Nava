@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Main entry point for Browsing Agent Pro."""
+"""Main entry point for Nava Pro."""
 
 import sys
 import logging

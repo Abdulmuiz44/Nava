@@ -1,4 +1,4 @@
-# Quick Start Guide - Browsing Agent Pro
+# Quick Start Guide - Nava Pro
 
 ## Installation
 

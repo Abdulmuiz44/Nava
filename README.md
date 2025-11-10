@@ -1,4 +1,4 @@
-# Browsing Agent 🤖
+# Nava 🤖
 
 A Python-based browser automation agent that can perform web browsing tasks using natural language commands. Built with Playwright for reliable cross-browser automation.
 
@@ -36,7 +36,7 @@ py --version
 1. **Clone or download this repository**
 ```powershell
 git clone <repository-url>
-cd Browsing_Agent
+cd Nava
 ```
 
 2. **Install Python dependencies**
@@ -67,7 +67,7 @@ This will:
 - Guide you through Python installation
 - Install all requirements automatically
 - Test everything for you
-- Give you a working Browsing Agent!
+- Give you a working Nava!
 
 2. **Then use the agent:**
 ```powershell
@@ -154,13 +154,13 @@ asyncio.run(example())
 
 ```python
 import asyncio
-from Browsing_Agent import BrowsingAgent
+from Nava import Nava
 from browser import BrowserConfig
 
 async def main():
     # Create agent with custom config
     config = BrowserConfig(headless=True)
-    agent = BrowsingAgent(config)
+    agent = Nava(config)
     
     # Execute tasks
     result = await agent.execute_task("search for machine learning")
@@ -239,10 +239,10 @@ python main.py "go to https://docs.python.org/3/" --headless
 
 ```python
 import asyncio
-from Browsing_Agent import BrowsingAgent
+from Nava import Nava
 
 async def batch_browse():
-    agent = BrowsingAgent()
+    agent = Nava()
     
     tasks = [
         "go to https://github.com",
@@ -288,7 +288,7 @@ py -m playwright install chromium
 **Import errors**
 ```powershell
 # Ensure you're in the project directory
-cd Browsing_Agent
+cd Nava
 python main.py
 # OR:
 py main.py
@@ -312,13 +312,13 @@ python main.py "go to slow-site.com" --timeout 120
 ### Project Structure
 
 ```
-Browsing_Agent/
+Nava/
 ├── main.py              # Main entry point
 ├── cli.py               # Command-line interface
 ├── browser.py           # Browser session management
 ├── browser_use.py       # Legacy compatibility wrapper
 ├── task_executor.py     # Task parsing and execution
-├── Browsing_Agent.py    # High-level agent class
+├── Nava.py              # High-level agent class
 ├── test_browser_use.py  # Alternative CLI implementation
 ├── requirements.txt     # Python dependencies
 └── README.md           # This file

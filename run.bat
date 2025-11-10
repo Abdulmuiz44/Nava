@@ -1,8 +1,8 @@
 @echo off
-REM Browsing Agent Runner for Windows
+REM Nava Runner for Windows
 REM This batch file automatically detects Python and runs the agent
 
-echo Browsing Agent - Starting...
+echo Nava - Starting...
 echo.
 
 REM Try to find Python

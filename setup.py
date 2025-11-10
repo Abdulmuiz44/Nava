@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Setup script for the Browsing Agent."""
+"""Setup script for Nava."""
 
 import subprocess
 import sys
@@ -74,7 +74,7 @@ def test_installation():
 
 def main():
     """Main setup function."""
-    print("🤖 Browsing Agent Setup")
+    print("🤖 Nava Setup")
     print("=" * 30)
     
     # Check Python
@@ -100,7 +100,7 @@ def main():
         return 1
     
     print("\n🎉 Setup completed successfully!")
-    print("\nYou can now use the Browsing Agent:")
+    print("\nYou can now use Nava:")
     print(f"  {sys.executable} main.py \"go to https://example.com\"")
     print(f"  {sys.executable} main.py \"search for python tutorials\"")
     
