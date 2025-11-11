@@ -116,9 +116,9 @@ export default function Home() {
 
   const exampleTasks = [
     { icon: Globe, text: 'go to github.com', color: 'text-blue-400' },
-    { icon: Search, text: 'search for react tutorials', color: 'text-green-400' },
     { icon: Zap, text: 'go to google.com, search Tradia', color: 'text-yellow-400' },
-    { icon: FileText, text: 'extract all links', color: 'text-orange-400' },
+    { icon: MousePointer, text: 'click menu, click login button', color: 'text-purple-400' },
+    { icon: FileText, text: 'go to example.com, click about, extract links', color: 'text-orange-400' },
   ];
 
   return (
@@ -134,7 +134,7 @@ export default function Home() {
           </div>
           <p className="text-2xl text-gray-300 mb-4">Intelligent Browser Automation</p>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Control your browser with natural language commands. Powered by Playwright and AI.
+            Execute complex multi-step workflows with natural language. Click buttons, fill forms, navigate pages - all with simple commands.
           </p>
         </div>
 
@@ -170,7 +170,7 @@ export default function Home() {
                 value={task}
                 onChange={(e) => setTask(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && !isExecuting && executeTask()}
-                placeholder="Enter command (e.g., go to github.com) or multiple commands (e.g., go to google.com, search Tradia)"
+                placeholder="Try: go to example.com, click menu, click login button, fill email with test@test.com, access dashboard"
                 className="flex-1 bg-slate-900/50 border border-purple-500/30 rounded-xl px-6 py-4 text-gray-200 placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
                 disabled={isExecuting}
               />

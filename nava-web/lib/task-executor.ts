@@ -23,18 +23,48 @@ export class TaskExecutor {
       return await this.session.goto(searchUrl);
     }
 
-    // Click tasks
+    // Click tasks with smart text-based selection
     if (normalizedTask.startsWith('click ')) {
-      const selector = this.extractSelector(task, 'click');
-      return await this.session.click(selector);
+      const target = task.replace(/^click\s+/i, '').trim();
+      
+      // Check if it looks like a CSS selector (starts with . # [ or contains specific chars)
+      if (target.match(/^[.#\[]/) || target.includes('::')) {
+        return await this.session.click(target);
+      }
+      
+      // Otherwise, treat as text to click
+      return await this.session.clickByText(target);
     }
 
-    // Fill tasks
-    const fillMatch = task.match(/fill\s+(.+?)\s+with\s+(.+)/i);
-    if (fillMatch) {
-      const selector = fillMatch[1].trim();
-      const text = fillMatch[2].trim();
-      return await this.session.fill(selector, text);
+    // Fill tasks - handle both single and multiple fields
+    if (normalizedTask.includes('fill ')) {
+      // Pattern: "fill email and password"
+      const multiFieldMatch = task.match(/fill\s+(.+?)\s+(?:and|with values?)/i);
+      if (multiFieldMatch) {
+        const fieldNames = multiFieldMatch[1].split(/\s+and\s+/i);
+        // This is for declaring intent, actual values come from user interaction
+        return {
+          success: true,
+          taskType: 'fill',
+          detail: `Ready to fill: ${fieldNames.join(', ')}`,
+          data: { fields: fieldNames }
+        };
+      }
+
+      // Pattern: "fill [field] with [value]"
+      const fillMatch = task.match(/fill\s+(.+?)\s+with\s+(.+)/i);
+      if (fillMatch) {
+        const fieldLabel = fillMatch[1].trim();
+        const value = fillMatch[2].trim();
+        
+        // Check if it looks like a CSS selector
+        if (fieldLabel.match(/^[.#\[]/) || fieldLabel.includes('::')) {
+          return await this.session.fill(fieldLabel, value);
+        }
+        
+        // Otherwise, treat as label text
+        return await this.session.fillByLabel(fieldLabel, value);
+      }
     }
 
     // Type tasks
@@ -87,12 +117,55 @@ export class TaskExecutor {
       };
     }
 
+    // Access/Dashboard navigation
+    if (normalizedTask.includes('access ') || normalizedTask.includes('open ') || normalizedTask.includes('navigate to ')) {
+      const pageMatch = task.match(/(?:access|open|navigate to)\s+(?:my\s+)?(.+)/i);
+      if (pageMatch) {
+        const pageName = pageMatch[1].trim();
+        // Try to find and click a link/button with that text
+        return await this.session.clickByText(pageName);
+      }
+    }
+
+    // Submit/Login actions
+    if (normalizedTask.includes('submit') || normalizedTask.includes('login') || normalizedTask.includes('sign in')) {
+      // Try to find and click submit button
+      const submitTexts = ['submit', 'login', 'sign in', 'log in', 'enter', 'go'];
+      for (const text of submitTexts) {
+        const result = await this.session.clickByText(text);
+        if (result.success) {
+          return result;
+        }
+      }
+      // Also try pressing Enter
+      return await this.session.press('Enter');
+    }
+
     return {
       success: false,
       taskType: 'unknown',
       detail: 'Task not recognized',
       errorMessage: `Unable to parse task: ${task}`,
     };
+  }
+
+  // Helper method to parse and execute form filling with multiple fields
+  async fillFormFields(fieldValuePairs: string): Promise<TaskResult> {
+    // Parse patterns like "email: test@test.com, password: 123456"
+    const pairs = fieldValuePairs.split(',').map(pair => {
+      const [label, value] = pair.split(':').map(s => s.trim());
+      return { label, value };
+    }).filter(p => p.label && p.value);
+
+    if (pairs.length === 0) {
+      return {
+        success: false,
+        taskType: 'fill',
+        detail: 'Could not parse field-value pairs',
+      };
+    }
+
+    return await this.session.fillMultipleFields(pairs);
   }
 
   async executeChain(tasks: string[]): Promise<TaskResult[]> {

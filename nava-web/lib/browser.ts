@@ -225,6 +225,136 @@ export class BrowserSession {
     });
   }
 
+  async clickByText(text: string): Promise<TaskResult> {
+    if (!this.page) {
+      throw new Error('Browser session not initialized');
+    }
+
+    try {
+      // Try multiple strategies to find and click the element
+      const selectors = [
+        `text="${text}"`,
+        `button:has-text("${text}")`,
+        `a:has-text("${text}")`,
+        `[role="button"]:has-text("${text}")`,
+        `*:has-text("${text}")`,
+      ];
+
+      let clicked = false;
+      let usedSelector = '';
+
+      for (const selector of selectors) {
+        try {
+          await this.page.waitForSelector(selector, { timeout: 5000 });
+          await this.page.click(selector, { timeout: 5000 });
+          clicked = true;
+          usedSelector = selector;
+          break;
+        } catch (e) {
+          // Try next selector
+          continue;
+        }
+      }
+
+      if (!clicked) {
+        throw new Error(`Could not find clickable element with text: ${text}`);
+      }
+
+      return {
+        success: true,
+        taskType: 'click',
+        detail: `Clicked element with text: "${text}"`,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        taskType: 'click',
+        detail: `Failed to click element with text: "${text}"`,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  async fillByLabel(labelText: string, value: string): Promise<TaskResult> {
+    if (!this.page) {
+      throw new Error('Browser session not initialized');
+    }
+
+    try {
+      // Try to find input by associated label
+      const input = await this.page.evaluateHandle((label) => {
+        // Find label containing the text
+        const labels = Array.from(document.querySelectorAll('label'));
+        const matchingLabel = labels.find(l => 
+          l.textContent?.toLowerCase().includes(label.toLowerCase())
+        );
+
+        if (matchingLabel) {
+          // Get associated input
+          if (matchingLabel.htmlFor) {
+            return document.getElementById(matchingLabel.htmlFor);
+          }
+          return matchingLabel.querySelector('input, textarea, select');
+        }
+
+        // Try finding input by placeholder or name
+        const inputs = Array.from(document.querySelectorAll('input, textarea, select'));
+        return inputs.find(input => {
+          const placeholder = input.getAttribute('placeholder')?.toLowerCase() || '';
+          const name = input.getAttribute('name')?.toLowerCase() || '';
+          const id = input.getAttribute('id')?.toLowerCase() || '';
+          const searchTerm = label.toLowerCase();
+          return placeholder.includes(searchTerm) || 
+                 name.includes(searchTerm) || 
+                 id.includes(searchTerm);
+        });
+      }, labelText);
+
+      const element = input.asElement();
+      if (element) {
+        await element.fill(value);
+        return {
+          success: true,
+          taskType: 'fill',
+          detail: `Filled "${labelText}" with value`,
+        };
+      } else {
+        throw new Error(`Could not find input for: ${labelText}`);
+      }
+    } catch (error) {
+      return {
+        success: false,
+        taskType: 'fill',
+        detail: `Failed to fill "${labelText}"`,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  async fillMultipleFields(fields: { label: string; value: string }[]): Promise<TaskResult> {
+    if (!this.page) {
+      throw new Error('Browser session not initialized');
+    }
+
+    const results: string[] = [];
+    let allSuccess = true;
+
+    for (const field of fields) {
+      const result = await this.fillByLabel(field.label, field.value);
+      results.push(result.detail);
+      if (!result.success) {
+        allSuccess = false;
+        break;
+      }
+    }
+
+    return {
+      success: allSuccess,
+      taskType: 'fill',
+      detail: results.join(', '),
+    };
+  }
+
   async close(): Promise<void> {
     if (this.page) {
       await this.page.close();

@@ -5,7 +5,11 @@ A production-ready Next.js application for intelligent browser automation with n
 ## 🚀 Features
 
 - **Natural Language Commands**: Control browsers with simple English commands
+- **Smart Text-Based Clicking**: Click buttons and links by their visible text - no selectors needed!
+- **Intelligent Form Filling**: Fill forms by field labels automatically
+- **Multi-Step Workflows**: Chain multiple commands with commas for complex automation
 - **Real-time Execution**: Instant task execution with live feedback
+- **Visible/Headless Toggle**: Watch automation or run in background
 - **Beautiful UI**: Modern, responsive interface with Tailwind CSS
 - **TypeScript**: Fully typed codebase for better development experience
 - **Playwright Integration**: Robust browser automation powered by Playwright
@@ -176,20 +180,82 @@ The `vercel.json` file is pre-configured with:
 - `go to <url>` - Navigate to a URL
 - `visit <url>` - Navigate to a URL
 - `navigate to <url>` - Navigate to a URL
+- `access <page>` - Navigate by clicking a link/button with text
+
+**Examples:**
+```
+go to https://example.com
+go to github.com
+access my dashboard
+```
 
 ### Search
 - `search for <query>` - Google search
 - `search <query>` - Google search
 
-### Interaction
-- `click <selector>` - Click an element
-- `fill <selector> with <text>` - Fill a form field
+**Examples:**
+```
+search for react tutorials
+search Tradia AI
+```
+
+### Clicking (Smart Text-Based)
+- `click <button text>` - Click by visible text (button, link, etc.)
+- `click <selector>` - Click by CSS selector
+
+**Examples:**
+```
+click login button
+click menu
+click Sign In
+click #submit-btn
+```
+
+### Form Filling (Smart Label Detection)
+- `fill <field name> with <value>` - Fill by label text
+- `fill <selector> with <value>` - Fill by CSS selector
+
+**Examples:**
+```
+fill email with test@example.com
+fill password with mypassword
+fill #username with john_doe
+```
+
+### Keyboard Actions
 - `type <text> in <selector>` - Type text
 - `press <key>` - Press a keyboard key
+
+**Examples:**
+```
+type hello world in #search
+press Enter
+```
 
 ### Data Extraction
 - `extract links` - Get all links from page
 - `screenshot` - Capture page screenshot
+
+### Complex Multi-Step Workflows
+Separate commands with commas to execute them in sequence:
+
+**Examples:**
+```
+go to example.com, click menu, click login button
+
+go to tradiaai.app, click menu, click login button, fill email with user@example.com, fill password with pass123, access my dashboard
+
+go to github.com, search repositories, extract links
+```
+
+### Wait Commands
+- `wait <seconds>` - Wait for specified duration
+
+**Examples:**
+```
+wait 5
+wait for 3 seconds
+```
 
 ## 🔧 Troubleshooting
 
