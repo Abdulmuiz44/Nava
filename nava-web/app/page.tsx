@@ -193,12 +193,20 @@ export default function Home() {
               </button>
             </div>
 
-            {/* Info Message */}
+            {/* Info Messages */}
             {showBrowser && (
               <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg flex items-start gap-2">
                 <Eye className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
                 <p className="text-sm text-blue-300">
                   <strong>Browser Visible Mode:</strong> A Chrome window will open and you&apos;ll see the automation in action!
+                </p>
+              </div>
+            )}
+            {task.includes(',') && (
+              <div className="mt-4 p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg flex items-start gap-2">
+                <Zap className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-purple-300">
+                  <strong>Task Chain Detected:</strong> Multiple commands will be executed in sequence!
                 </p>
               </div>
             )}

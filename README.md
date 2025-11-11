@@ -1,17 +1,125 @@
 # Nava 🤖
 
-A Python-based browser automation agent that can perform web browsing tasks using natural language commands. Built with Playwright for reliable cross-browser automation.
+**Intelligent Browser Automation Platform** - Control browsers with natural language commands.
+
+Nava is available in **two versions**:
+- 🐍 **Python CLI** - Command-line interface for local automation
+- 🌐 **Next.js Web App** - Modern web interface with beautiful UI (deployable to Vercel)
+
+Both versions share the same powerful automation capabilities built on Playwright.
+
+---
+
+## 🚀 Choose Your Version
+
+<table>
+<tr>
+<td width="50%" align="center">
+
+### 🌐 **Next.js Web App**
+**Recommended for Production**
+
+```bash
+cd nava-web
+npm install && npm run dev
+```
+
+[📖 Web Documentation →](nava-web/README.md)
+
+</td>
+<td width="50%" align="center">
+
+### 🐍 **Python CLI**
+**For Developers & Scripts**
+
+```bash
+pip install -r requirements.txt
+python main.py "go to github.com"
+```
+
+[📖 CLI Documentation ↓](#python-cli-installation-)
+
+</td>
+</tr>
+</table>
+
+---
+
+### 🌐 Next.js Web App (Recommended for Production)
+
+**Modern, production-ready web application with:**
+- ✨ Beautiful UI with Tailwind CSS
+- 🔗 RESTful API endpoints
+- 🚀 One-click Vercel deployment
+- 🌍 Global CDN distribution
+- 📊 Built-in analytics
+- 🎨 Real-time command execution
+- ⚡ Task chaining with commas
+- 👁️ Visible/Headless browser toggle
+
+**Quick Start:**
+```bash
+cd nava-web
+npm install
+npm run dev
+# Visit http://localhost:3000
+```
+
+**Deploy to Vercel:**
+```bash
+cd nava-web
+vercel
+```
+
+📚 **Full Web Documentation:** See [`nava-web/README.md`](nava-web/README.md) and [`NAVA-WEB-README.md`](NAVA-WEB-README.md)
+
+---
+
+### 🐍 Python CLI (Classic Version)
+
+**Command-line interface for developers:**
+- 💻 Terminal-based control
+- 🔧 Python library integration
+- 🛠️ Scriptable automation
+- 📦 Offline usage
+
+**Quick Start:**
+```bash
+pip install -r requirements.txt
+python -m playwright install chromium
+python main.py "go to github.com"
+```
+
+Continue reading below for full Python CLI documentation.
+
+---
 
 ## Features ✨
 
-- **Natural Language Interface**: Command the browser using simple phrases like "go to github.com" or "search for python tutorials"
-- **Cross-Browser Support**: Works with Chrome, Firefox, and WebKit
-- **Headless & GUI Modes**: Run with or without a visible browser window
-- **Screenshot Capture**: Automatically save screenshots of your browsing sessions
-- **Command Line Interface**: Easy-to-use CLI for quick automation tasks
-- **Programmatic API**: Use as a Python library in your own projects
+### Shared Features (Both Versions)
+- **Natural Language Commands**: "go to github.com", "search for tutorials", "extract links"
+- **Playwright Automation**: Reliable cross-browser automation
+- **Screenshot Capture**: Save screenshots of browsing sessions
+- **Task Chaining**: Execute multiple commands in sequence
+- **Headless & Visible Modes**: Run with or without browser window
 
-## Installation 🚀
+### Web Version Exclusive
+- **Modern UI**: Beautiful, responsive interface
+- **API Endpoints**: `/api/execute` and `/api/execute-chain`
+- **Real-time Feedback**: Live execution status
+- **Command History**: Track your automation tasks
+- **Task Chain Detection**: Automatically handles comma-separated commands
+- **Vercel Deployment**: Production-ready in seconds
+
+### CLI Version Exclusive
+- **Programmatic API**: Use as Python library
+- **Multiple Browsers**: Chrome, Firefox, WebKit support
+- **Batch Files**: Windows one-click automation
+- **Script Integration**: Easy Python integration
+
+## Python CLI Installation 🚀
+
+> **Note:** For Next.js Web App installation, see [`nava-web/README.md`](nava-web/README.md)
 
 ### Prerequisites
 - Python 3.8 or higher
@@ -78,7 +186,9 @@ run.bat
 
 The batch files will automatically detect your Python installation!
 
-## Usage 📖
+## Python CLI Usage 📖
+
+> **Note:** For Next.js Web App usage, visit http://localhost:3000 after running `npm run dev` in the `nava-web` folder
 
 ### Command Line Interface
 
@@ -177,7 +287,7 @@ asyncio.run(main())
 
 ## Supported Commands 🎯
 
-The agent understands these natural language patterns:
+Both Python CLI and Next.js Web versions support these natural language patterns:
 
 ### Navigation Commands
 - `"go to https://example.com"`
@@ -189,6 +299,19 @@ The agent understands these natural language patterns:
 - `"search machine learning"`
 - `"find restaurants near me"`
 - Or just type any query without "search" prefix
+
+### Task Chaining (Web Version)
+Separate multiple commands with commas to execute them in sequence:
+- `"go to google.com, search Tradia"`
+- `"go to github.com, extract links"`
+- `"go to example.com, screenshot, extract links"`
+
+### Additional Commands
+- `"extract links"` - Get all links from the current page
+- `"screenshot"` - Capture the current page
+- `"click [selector]"` - Click an element
+- `"fill [selector] with [text]"` - Fill a form field
+- `"press [key]"` - Press a keyboard key
 
 ## Configuration ⚙️
 
@@ -313,15 +436,34 @@ python main.py "go to slow-site.com" --timeout 120
 
 ```
 Nava/
-├── main.py              # Main entry point
-├── cli.py               # Command-line interface
-├── browser.py           # Browser session management
-├── browser_use.py       # Legacy compatibility wrapper
-├── task_executor.py     # Task parsing and execution
-├── Nava.py              # High-level agent class
-├── test_browser_use.py  # Alternative CLI implementation
-├── requirements.txt     # Python dependencies
-└── README.md           # This file
+├── 🐍 Python CLI Version
+│   ├── main.py              # Main entry point
+│   ├── cli.py               # Command-line interface
+│   ├── browser.py           # Browser session management
+│   ├── task_executor.py     # Task parsing and execution
+│   ├── Nava.py              # High-level agent class
+│   ├── requirements.txt     # Python dependencies
+│   └── README.md            # This file
+│
+├── 🌐 Next.js Web Version
+│   └── nava-web/
+│       ├── app/
+│       │   ├── api/         # API routes
+│       │   │   ├── execute/        # Single task execution
+│       │   │   └── execute-chain/  # Task chain execution
+│       │   ├── page.tsx     # Main UI
+│       │   └── layout.tsx   # Root layout
+│       ├── lib/
+│       │   ├── browser.ts          # Browser automation
+│       │   └── task-executor.ts    # Task parsing
+│       ├── package.json     # Dependencies
+│       ├── vercel.json      # Deployment config
+│       └── README.md        # Web version docs
+│
+└── 📚 Documentation
+    ├── NAVA-WEB-README.md          # Web version overview
+    ├── nava-web/DEPLOYMENT.md      # Deployment guide
+    └── nava-web/QUICKSTART.md      # Quick start guide
 ```
 
 ### Running Tests
@@ -333,12 +475,39 @@ python test_browser_use.py "go to https://example.com"
 py test_browser_use.py "go to https://example.com"
 ```
 
+### Version Comparison
+
+| Feature | Python CLI | Next.js Web |
+|---------|-----------|-------------|
+| **Interface** | Terminal | Web Browser |
+| **Deployment** | Local only | Vercel/Cloud |
+| **UI** | Text-based | Modern GUI |
+| **API Access** | Python library | REST API |
+| **Task Chaining** | Manual scripting | Comma-separated |
+| **Real-time Feedback** | Console logs | Live UI updates |
+| **Command History** | ❌ | ✅ |
+| **Browser Toggle** | CLI flag | UI checkbox |
+| **Analytics** | ❌ | ✅ Vercel |
+| **Global Access** | ❌ | ✅ CDN |
+| **Setup Time** | 5 min | 2 min |
+| **Best For** | Scripts/Local | Production/Teams |
+
 ### Contributing
 
+**Python CLI:**
 1. Follow PEP 8 style guidelines
 2. Add logging for new features
 3. Include error handling for edge cases
-4. Update this README for new functionality
+
+**Next.js Web:**
+1. Follow TypeScript best practices
+2. Use Tailwind CSS for styling
+3. Maintain API compatibility
+
+**Both:**
+- Update relevant README files
+- Test automation functionality
+- Document new features
 
 ## License 📄
 
@@ -350,4 +519,24 @@ For issues, questions, or contributions, please refer to the project repository 
 
 ---
 
-**Happy browsing! 🌐**
+## 📚 Quick Links
+
+### Next.js Web Version
+- 📖 [Full Web Documentation](nava-web/README.md)
+- 🚀 [Quick Start Guide](nava-web/QUICKSTART.md)
+- 🌐 [Deployment Guide](nava-web/DEPLOYMENT.md)
+- 🔄 [Migration Summary](nava-web/MIGRATION-SUMMARY.md)
+- 📝 [Web Overview](NAVA-WEB-README.md)
+
+### Python CLI Version
+- 📖 You're reading it! (This README)
+- 🐍 [Python Requirements](requirements.txt)
+
+### Getting Started
+- **Want a web interface?** → Go to [`nava-web`](nava-web/) folder
+- **Want command-line?** → Continue with Python CLI (above)
+- **Want both?** → They work together perfectly!
+
+---
+
+**Happy Automating! 🚀🌐**
