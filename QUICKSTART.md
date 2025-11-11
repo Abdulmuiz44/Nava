@@ -1,201 +1,150 @@
-# Quick Start Guide - Nava Pro
+# ⚡ Nava Web - Quick Start Guide
 
-## Installation
+Get your browser automation platform running in 5 minutes!
 
-```powershell
-# Install dependencies
-pip install -r requirements.txt
+## 🎯 Deploy to Vercel in 3 Commands
 
-# Install browser
-py -m playwright install chromium
+```bash
+cd nava-web
+npm install
+vercel
 ```
 
-## 5-Minute Tour
+That's it! Your app will be live at `https://your-project.vercel.app`
 
-### 1. Basic Navigation
-```powershell
-py main.py "go to github.com"
+---
+
+## 📦 Local Setup (Development)
+
+### 1. Install Dependencies
+```bash
+cd nava-web
+npm install
 ```
 
-### 2. Search
-```powershell
-py main.py "search for python tutorials"
+### 2. Install Playwright
+```bash
+npx playwright install chromium
 ```
 
-### 3. Multiple Tasks (Chaining)
-```powershell
-py main.py "go to github.com, search python, take screenshot"
+### 3. Run Development Server
+```bash
+npm run dev
 ```
 
-### 4. Extract Data
-```powershell
-py main.py "extract all links from https://github.com" --json links.json
+Open [http://localhost:3000](http://localhost:3000) 🚀
+
+---
+
+## 🌐 Deploy to Production
+
+### Option A: Vercel Dashboard (Easiest)
+
+1. Push code to GitHub
+2. Go to [vercel.com/new](https://vercel.com/new)
+3. Import your repository
+4. Click "Deploy"
+
+### Option B: Vercel CLI (Fastest)
+
+```bash
+npm i -g vercel  # Install CLI
+vercel login     # Login
+vercel --prod    # Deploy
 ```
 
-### 5. Click & Fill Forms
-```powershell
-py main.py "
-  go to github.com,
-  click on 'Sign in',
-  fill input[name=login] with myemail@example.com,
-  fill input[name=password] with mysecret,
-  press Enter
-"
-```
+---
 
-### 6. Interactive Mode
-```powershell
-py main.py -i
-```
+## 🧪 Test Your Deployment
 
-Type commands like:
-- `go to github.com`
-- `search python tutorials`
-- `click 'Sign In'`
-- `help` for more
+### Test in Browser
+Visit: `https://your-project.vercel.app`
 
-### 7. Save & Reuse Workflows
-```powershell
-# Save a workflow
-py main.py "go to github.com, click login" --save my_login.yaml
-
-# Reuse it later
-py main.py --load my_login.yaml
-```
-
-### 8. API Server
-```powershell
-# Start server
-py main.py --api --port 8000
-
-# In another terminal, call it:
-curl -X POST http://localhost:8000/execute \
+### Test API
+```bash
+curl -X POST https://your-project.vercel.app/api/execute \
   -H "Content-Type: application/json" \
-  -d '{"task": "go to github.com", "browser": "chrome"}'
+  -d '{"task": "go to github.com"}'
 ```
 
 ---
 
-## Common Use Cases
+## 💡 Example Commands
 
-### Web Scraping
-```powershell
-py main.py "
-  go to https://example.com,
-  extract all text from current,
-  extract all links from current
-" --json output.json
+Try these in the web interface:
+
 ```
-
-### Form Automation
-```powershell
-py main.py "
-  go to mysite.com/form,
-  fill #name with John Doe,
-  fill #email with john@example.com,
-  fill #message with Hello,
-  click button[type=submit]
-"
-```
-
-### Login Automation
-```powershell
-py main.py "
-  go to site.com/login,
-  fill input[name=username] with user,
-  fill input[name=password] with pass,
-  press Enter
-"
-```
-
-### Data Monitoring
-```powershell
-# Check status every 5 minutes
-py main.py "go to status.site.com, take screenshot" \
-  --schedule "every 5 minutes" \
-  --slack https://hooks.slack.com/services/YOUR/WEBHOOK
-```
-
-### Parallel Tasks
-```powershell
-py main.py \
-  "extract links from site1.com" \
-  "extract links from site2.com" \
-  "extract links from site3.com" \
-  --parallel 3 \
-  --json results.json
+go to github.com
+search for react tutorials
+go to google.com
+extract links
 ```
 
 ---
 
-## Selector Guide
-
-Use CSS selectors to target elements:
+## 📁 Project Structure
 
 ```
-button              All buttons
-.btn-primary        Elements with class "btn-primary"
-#submit             Element with id "submit"
-input[name=email]   Input with name="email"
-a[href*="github"]   Links containing "github"
-```
-
----
-
-## Options Cheat Sheet
-
-```
---browser chrome|firefox|webkit    Choose browser (default: chrome)
---headless                         No visible window
---timeout 60                       Wait up to 60 seconds
---retries 3                        Retry failed tasks 3 times
---json output.json                 Save results as JSON
---screenshot result.png            Save screenshot
---load workflow.yaml               Load workflow file
---save workflow.yaml               Save workflow file
---vars key=val,key2=val2          Use variables
---webhook http://...              Send results to webhook
---slack http://...                Slack notifications
--i, --interactive                  Interactive mode
+nava-web/
+├── app/
+│   ├── api/              # API routes
+│   ├── page.tsx          # Home page
+│   └── layout.tsx        # Root layout
+├── lib/
+│   ├── browser.ts        # Browser automation
+│   └── task-executor.ts  # Task parsing
+├── package.json          # Dependencies
+└── vercel.json           # Deployment config
 ```
 
 ---
 
-## Troubleshooting
+## 🔧 Common Issues
 
-**Python not found?**
-```powershell
-# Try:
-py --version
-
-# Or install from https://python.org
+### Playwright Not Installing?
+```bash
+npx playwright install --with-deps chromium
 ```
 
-**Browser error?**
-```powershell
-py -m playwright install chromium
-```
+### Function Timeout?
+Upgrade to Vercel Pro for 300s timeout
 
-**Timeout errors?**
-```powershell
-py main.py "slow-task" --timeout 120
-```
-
-**Element not found?**
-- Add wait before clicking:
-```powershell
-py main.py "wait for '.button', click '.button'"
+### Out of Memory?
+Increase memory in `vercel.json`:
+```json
+{
+  "functions": {
+    "app/api/**/*.ts": {
+      "memory": 3008
+    }
+  }
+}
 ```
 
 ---
 
-## Next Steps
+## 📚 Documentation
 
-1. Read **FEATURES.md** for all capabilities
-2. Check **examples/** directory for sample workflows
-3. Try **--interactive** mode with help command
-4. Start building your automation!
+- **Full README**: `README.md`
+- **Deployment Guide**: `DEPLOYMENT.md`
+- **API Docs**: In README.md
 
 ---
 
-Questions? Run: `py main.py -h`
+## 🎉 You're Ready!
+
+Your Nava automation platform is production-ready!
+
+**Next Steps:**
+1. ✅ Deploy to Vercel
+2. ✅ Test automation tasks
+3. ✅ Add custom domain (optional)
+4. ✅ Monitor performance
+
+**Need Help?**
+- Check `DEPLOYMENT.md` for detailed instructions
+- Review `README.md` for API documentation
+
+---
+
+Made with ❤️ using Next.js, TypeScript, Tailwind CSS, and Playwright
