@@ -1,7 +1,7 @@
 {
   "buildCommand": "pnpm run build",
   "devCommand": "pnpm run dev",
-  "installCommand": "pnpm install && npx playwright install chromium --with-deps",
+  "installCommand": "pnpm install && npx playwright install chromium",
   "framework": "nextjs",
   "regions": ["iad1"],
   "functions": {
@@ -12,6 +12,7 @@
   },
   "env": {
     "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "0",
-    "PLAYWRIGHT_BROWSERS_PATH": "/tmp/playwright"
+    "PLAYWRIGHT_BROWSERS_PATH": "/tmp/playwright",
+    "NODE_OPTIONS": "--max-old-space-size=2048"
   }
 }
