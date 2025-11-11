@@ -1,16 +1,17 @@
 {
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install && npx playwright install chromium",
+  "buildCommand": "pnpm run build",
+  "devCommand": "pnpm run dev",
+  "installCommand": "pnpm install && npx playwright install chromium --with-deps",
   "framework": "nextjs",
   "regions": ["iad1"],
   "functions": {
     "app/api/**/*.ts": {
-      "memory": 3008,
-      "maxDuration": 300
+      "memory": 2048,
+      "maxDuration": 60
     }
   },
   "env": {
-    "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "0"
+    "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "0",
+    "PLAYWRIGHT_BROWSERS_PATH": "/tmp/playwright"
   }
 }
