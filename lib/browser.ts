@@ -355,6 +355,241 @@ export class BrowserSession {
     };
   }
 
+  async scroll(direction: 'up' | 'down' | 'top' | 'bottom', distance?: number): Promise<TaskResult> {
+    if (!this.page) {
+      throw new Error('Browser session not initialized');
+    }
+
+    try {
+      if (direction === 'top') {
+        await this.page.evaluate(() => window.scrollTo(0, 0));
+      } else if (direction === 'bottom') {
+        await this.page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+      } else if (direction === 'down') {
+        const scrollAmount = distance ?? 500;
+        await this.page.evaluate((amount) => window.scrollBy(0, amount), scrollAmount);
+      } else if (direction === 'up') {
+        const scrollAmount = distance ?? 500;
+        await this.page.evaluate((amount) => window.scrollBy(0, -amount), scrollAmount);
+      }
+
+      return {
+        success: true,
+        taskType: 'scroll',
+        detail: `Scrolled ${direction}${distance ? ` by ${distance}px` : ''}`,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        taskType: 'scroll',
+        detail: `Failed to scroll ${direction}`,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  async scrollToElement(selector: string): Promise<TaskResult> {
+    if (!this.page) {
+      throw new Error('Browser session not initialized');
+    }
+
+    try {
+      await this.page.waitForSelector(selector, { timeout: this.config.elementTimeout });
+      await this.page.locator(selector).scrollIntoViewIfNeeded();
+
+      return {
+        success: true,
+        taskType: 'scroll',
+        detail: `Scrolled to element: ${selector}`,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        taskType: 'scroll',
+        detail: `Failed to scroll to element: ${selector}`,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  async hover(selector: string): Promise<TaskResult> {
+    if (!this.page) {
+      throw new Error('Browser session not initialized');
+    }
+
+    try {
+      await this.page.waitForSelector(selector, { timeout: this.config.elementTimeout });
+      await this.page.hover(selector);
+
+      return {
+        success: true,
+        taskType: 'hover',
+        detail: `Hovered over element: ${selector}`,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        taskType: 'hover',
+        detail: `Failed to hover over element: ${selector}`,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  async selectOption(selector: string, option: string): Promise<TaskResult> {
+    if (!this.page) {
+      throw new Error('Browser session not initialized');
+    }
+
+    try {
+      await this.page.waitForSelector(selector, { timeout: this.config.elementTimeout });
+      await this.page.selectOption(selector, { label: option });
+
+      return {
+        success: true,
+        taskType: 'select',
+        detail: `Selected "${option}" from dropdown: ${selector}`,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        taskType: 'select',
+        detail: `Failed to select option from dropdown: ${selector}`,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  async getText(selector: string): Promise<TaskResult> {
+    if (!this.page) {
+      throw new Error('Browser session not initialized');
+    }
+
+    try {
+      await this.page.waitForSelector(selector, { timeout: this.config.elementTimeout });
+      const text = await this.page.textContent(selector);
+
+      return {
+        success: true,
+        taskType: 'getText',
+        detail: `Retrieved text from element: ${selector}`,
+        data: { text: text?.trim() || '' },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        taskType: 'getText',
+        detail: `Failed to get text from element: ${selector}`,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  async waitForElement(selector: string, timeout?: number): Promise<TaskResult> {
+    if (!this.page) {
+      throw new Error('Browser session not initialized');
+    }
+
+    try {
+      await this.page.waitForSelector(selector, { 
+        timeout: timeout ?? this.config.elementTimeout,
+        state: 'visible'
+      });
+
+      return {
+        success: true,
+        taskType: 'wait',
+        detail: `Element appeared: ${selector}`,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        taskType: 'wait',
+        detail: `Element did not appear: ${selector}`,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  async switchToTab(tabIndex: number): Promise<TaskResult> {
+    if (!this.context) {
+      throw new Error('Browser context not initialized');
+    }
+
+    try {
+      const pages = this.context.pages();
+      if (tabIndex < 0 || tabIndex >= pages.length) {
+        throw new Error(`Invalid tab index: ${tabIndex}. Available tabs: ${pages.length}`);
+      }
+
+      this.page = pages[tabIndex];
+      await this.page.bringToFront();
+
+      return {
+        success: true,
+        taskType: 'switchTab',
+        detail: `Switched to tab ${tabIndex}`,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        taskType: 'switchTab',
+        detail: `Failed to switch to tab ${tabIndex}`,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  async uploadFile(selector: string, filePath: string): Promise<TaskResult> {
+    if (!this.page) {
+      throw new Error('Browser session not initialized');
+    }
+
+    try {
+      await this.page.waitForSelector(selector, { timeout: this.config.elementTimeout });
+      await this.page.setInputFiles(selector, filePath);
+
+      return {
+        success: true,
+        taskType: 'upload',
+        detail: `Uploaded file to: ${selector}`,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        taskType: 'upload',
+        detail: `Failed to upload file to: ${selector}`,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  async getDownloadUrl(): Promise<TaskResult> {
+    if (!this.page) {
+      throw new Error('Browser session not initialized');
+    }
+
+    try {
+      const downloadPromise = this.page.waitForEvent('download', { timeout: 30000 });
+      const download = await downloadPromise;
+      const url = download.url();
+
+      return {
+        success: true,
+        taskType: 'download',
+        detail: 'Download initiated',
+        data: { downloadUrl: url },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        taskType: 'download',
+        detail: 'Failed to capture download',
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
   async close(): Promise<void> {
     if (this.page) {
       await this.page.close();
