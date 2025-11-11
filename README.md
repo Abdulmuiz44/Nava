@@ -71,6 +71,8 @@ cd nava-web
 vercel
 ```
 
+⚠️ **Deploying from root?** See [VERCEL-DEPLOYMENT.md](VERCEL-DEPLOYMENT.md) for configuration details.
+
 📚 **Full Web Documentation:** See [`nava-web/README.md`](nava-web/README.md) and [`NAVA-WEB-README.md`](NAVA-WEB-README.md)
 
 ---

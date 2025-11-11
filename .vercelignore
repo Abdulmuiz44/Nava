@@ -1,0 +1,12 @@
+# Ignore Python CLI files - they are not for deployment
+*.py
+requirements.txt
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.bat
+*.sh
+
+# Ignore documentation and config files not needed for web app
+NAVA-WEB-README.md
