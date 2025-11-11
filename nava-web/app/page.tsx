@@ -12,7 +12,9 @@ import {
   Image as ImageIcon,
   ArrowRight,
   Play,
-  Loader2
+  Loader2,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 interface TaskResult {
@@ -28,6 +30,7 @@ export default function Home() {
   const [isExecuting, setIsExecuting] = useState(false);
   const [result, setResult] = useState<TaskResult | null>(null);
   const [history, setHistory] = useState<{ task: string; result: TaskResult }[]>([]);
+  const [showBrowser, setShowBrowser] = useState(true); // false = headless, true = visible
 
   const executeTask = async () => {
     if (!task.trim()) return;
@@ -36,26 +39,68 @@ export default function Home() {
     setResult(null);
 
     try {
-      const response = await fetch('/api/execute', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ task, headless: true }),
-      });
-
-      const data = await response.json();
+      // Check if task contains comma-separated commands
+      const hasMultipleTasks = task.includes(',');
       
-      if (data.result) {
-        setResult(data.result);
-        setHistory(prev => [{ task, result: data.result }, ...prev.slice(0, 9)]);
-      } else {
-        setResult({
-          success: false,
-          taskType: 'error',
-          detail: 'Failed to execute task',
-          errorMessage: data.error || 'Unknown error',
+      if (hasMultipleTasks) {
+        // Split by comma and execute as a chain
+        const tasks = task.split(',').map(t => t.trim()).filter(t => t.length > 0);
+        
+        const response = await fetch('/api/execute-chain', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ tasks, headless: !showBrowser }),
         });
+
+        const data = await response.json();
+        
+        if (data.results) {
+          // Show combined result
+          const allSuccessful = data.results.every((r: TaskResult) => r.success);
+          const resultDetail = data.results.map((r: TaskResult, i: number) => 
+            `${i + 1}. ${r.detail}`
+          ).join('\n');
+          
+          setResult({
+            success: allSuccessful,
+            taskType: 'chain',
+            detail: `Executed ${tasks.length} tasks:\n${resultDetail}`,
+            data: data.results,
+          });
+          setHistory(prev => [{ task, result: data.results[data.results.length - 1] }, ...prev.slice(0, 9)]);
+        } else {
+          setResult({
+            success: false,
+            taskType: 'error',
+            detail: 'Failed to execute task chain',
+            errorMessage: data.error || 'Unknown error',
+          });
+        }
+      } else {
+        // Execute single task
+        const response = await fetch('/api/execute', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ task, headless: !showBrowser }),
+        });
+
+        const data = await response.json();
+        
+        if (data.result) {
+          setResult(data.result);
+          setHistory(prev => [{ task, result: data.result }, ...prev.slice(0, 9)]);
+        } else {
+          setResult({
+            success: false,
+            taskType: 'error',
+            detail: 'Failed to execute task',
+            errorMessage: data.error || 'Unknown error',
+          });
+        }
       }
     } catch (error) {
       setResult({
@@ -72,7 +117,7 @@ export default function Home() {
   const exampleTasks = [
     { icon: Globe, text: 'go to github.com', color: 'text-blue-400' },
     { icon: Search, text: 'search for react tutorials', color: 'text-green-400' },
-    { icon: MousePointer, text: 'click button#submit', color: 'text-purple-400' },
+    { icon: Zap, text: 'go to google.com, search Tradia', color: 'text-yellow-400' },
     { icon: FileText, text: 'extract all links', color: 'text-orange-400' },
   ];
 
@@ -96,9 +141,27 @@ export default function Home() {
         {/* Main Command Interface */}
         <div className="max-w-4xl mx-auto">
           <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-purple-500/20 shadow-2xl p-8 mb-8">
-            <div className="flex items-center gap-3 mb-6">
-              <Terminal className="w-6 h-6 text-purple-400" />
-              <h2 className="text-xl font-semibold text-gray-200">Command Center</h2>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <Terminal className="w-6 h-6 text-purple-400" />
+                <h2 className="text-xl font-semibold text-gray-200">Command Center</h2>
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer bg-slate-900/50 px-4 py-2 rounded-lg border border-purple-500/20 hover:border-purple-500/40 transition-all">
+                {showBrowser ? (
+                  <Eye className="w-4 h-4 text-green-400" />
+                ) : (
+                  <EyeOff className="w-4 h-4 text-gray-500" />
+                )}
+                <input
+                  type="checkbox"
+                  checked={showBrowser}
+                  onChange={(e) => setShowBrowser(e.target.checked)}
+                  className="w-4 h-4 rounded border-purple-500/30 bg-slate-900/50 text-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                />
+                <span className={`text-sm font-medium ${showBrowser ? 'text-green-400' : 'text-gray-400'}`}>
+                  {showBrowser ? 'Browser Visible' : 'Headless Mode'}
+                </span>
+              </label>
             </div>
 
             <div className="flex gap-4">
@@ -107,7 +170,7 @@ export default function Home() {
                 value={task}
                 onChange={(e) => setTask(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && !isExecuting && executeTask()}
-                placeholder="Enter your command... (e.g., go to github.com)"
+                placeholder="Enter command (e.g., go to github.com) or multiple commands (e.g., go to google.com, search Tradia)"
                 className="flex-1 bg-slate-900/50 border border-purple-500/30 rounded-xl px-6 py-4 text-gray-200 placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
                 disabled={isExecuting}
               />
@@ -130,6 +193,16 @@ export default function Home() {
               </button>
             </div>
 
+            {/* Info Message */}
+            {showBrowser && (
+              <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg flex items-start gap-2">
+                <Eye className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-blue-300">
+                  <strong>Browser Visible Mode:</strong> A Chrome window will open and you&apos;ll see the automation in action!
+                </p>
+              </div>
+            )}
+
             {/* Result Display */}
             {result && (
               <div className={`mt-6 p-6 rounded-xl border ${
@@ -146,12 +219,28 @@ export default function Home() {
                       result.success ? 'text-green-300' : 'text-red-300'
                     }`}>
                       {result.success ? 'Success' : 'Failed'}
+                      {result.taskType === 'chain' && ' - Task Chain'}
                     </p>
-                    <p className="text-gray-300">{result.detail}</p>
+                    <p className="text-gray-300 whitespace-pre-line">{result.detail}</p>
                     {result.errorMessage && (
                       <p className="text-red-400 text-sm mt-2">{result.errorMessage}</p>
                     )}
-                    {result.data && (
+                    {result.data && result.taskType === 'chain' && Array.isArray(result.data) && (
+                      <div className="mt-4 space-y-2">
+                        {result.data.map((taskResult: TaskResult, index: number) => (
+                          <div key={index} className="p-3 bg-slate-900/50 rounded-lg border border-slate-700/50">
+                            <div className="flex items-center gap-2">
+                              <span className={taskResult.success ? 'text-green-400' : 'text-red-400'}>
+                                {taskResult.success ? '✓' : '✗'}
+                              </span>
+                              <span className="text-sm text-gray-400">Step {index + 1}:</span>
+                              <span className="text-sm text-gray-300">{taskResult.detail}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {result.data && result.taskType !== 'chain' && (
                       <pre className="mt-4 p-4 bg-slate-900/50 rounded-lg text-sm text-gray-300 overflow-x-auto">
                         {JSON.stringify(result.data, null, 2)}
                       </pre>
