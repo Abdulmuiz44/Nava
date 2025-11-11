@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body: ExecuteChainRequest = await request.json();
-    const { tasks, headless = true, continueOnError = false } = body;
+    const { tasks, headless = true } = body;
 
     if (!tasks || !Array.isArray(tasks) || tasks.length === 0) {
       return NextResponse.json(

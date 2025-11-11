@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { 
   ArrowLeft, 
   Download, 
@@ -10,7 +9,6 @@ import {
   Camera,
   Search,
   Calendar,
-  ImageIcon,
   X,
   ExternalLink
 } from 'lucide-react';
@@ -105,6 +103,7 @@ export default function ScreenshotsPage() {
                   className="relative aspect-video bg-slate-900 cursor-pointer overflow-hidden"
                   onClick={() => setSelectedScreenshot(screenshot)}
                 >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={screenshot.url}
                     alt={screenshot.taskName}
@@ -170,6 +169,7 @@ export default function ScreenshotsPage() {
             >
               {/* Image */}
               <div className="bg-slate-900 rounded-xl overflow-hidden mb-4">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={selectedScreenshot.url}
                   alt={selectedScreenshot.taskName}

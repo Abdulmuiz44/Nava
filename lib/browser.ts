@@ -11,7 +11,7 @@ export interface TaskResult {
   success: boolean;
   taskType: string;
   detail: string;
-  data?: any;
+  data?: unknown;
   errorMessage?: string;
 }
 
@@ -209,7 +209,7 @@ export class BrowserSession {
         timeout: this.config.elementTimeout 
       });
       return await this.page.textContent(selector);
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -241,16 +241,14 @@ export class BrowserSession {
       ];
 
       let clicked = false;
-      let usedSelector = '';
 
       for (const selector of selectors) {
         try {
           await this.page.waitForSelector(selector, { timeout: 5000 });
           await this.page.click(selector, { timeout: 5000 });
           clicked = true;
-          usedSelector = selector;
           break;
-        } catch (e) {
+        } catch {
           // Try next selector
           continue;
         }

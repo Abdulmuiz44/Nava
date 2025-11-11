@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 // This is a simple API that returns workflow templates
 // Actual workflow storage happens client-side in localStorage
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   // Return example workflow templates
   const templates = [
     {

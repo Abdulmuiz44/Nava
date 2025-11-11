@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { 
@@ -11,7 +11,6 @@ import {
   Search, 
   MousePointer, 
   FileText,
-  Image as ImageIcon,
   ArrowRight,
   Play,
   Loader2,
@@ -21,21 +20,20 @@ import {
   RotateCcw,
   Camera,
   Layers,
-  BookOpen,
-  Download
+  BookOpen
 } from 'lucide-react';
-import { WorkflowManager, Workflow } from '@/lib/workflow-manager';
+import { WorkflowManager } from '@/lib/workflow-manager';
 import { ScreenshotManager } from '@/lib/screenshot-manager';
 
 interface TaskResult {
   success: boolean;
   taskType: string;
   detail: string;
-  data?: any;
+  data?: unknown;
   errorMessage?: string;
 }
 
-export default function Home() {
+function HomeContent() {
   const searchParams = useSearchParams();
   const [task, setTask] = useState('');
   const [isExecuting, setIsExecuting] = useState(false);
@@ -77,8 +75,6 @@ export default function Home() {
 
     setIsExecuting(true);
     setResult(null);
-
-    const startTime = Date.now();
 
     try {
       // Check if task contains comma-separated commands
@@ -151,12 +147,15 @@ export default function Home() {
           }, ...prev.slice(0, 19)]);
 
           // Handle screenshots
-          if (data.result.taskType === 'screenshot' && data.result.data?.screenshot) {
-            ScreenshotManager.saveScreenshot({
-              url: `data:image/png;base64,${data.result.data.screenshot}`,
-              taskName: task,
-              metadata: { pageUrl: data.result.data.pageUrl }
-            });
+          if (data.result.taskType === 'screenshot' && data.result.data && typeof data.result.data === 'object') {
+            const resultData = data.result.data as { screenshot?: string; pageUrl?: string };
+            if (resultData.screenshot) {
+              ScreenshotManager.saveScreenshot({
+                url: `data:image/png;base64,${resultData.screenshot}`,
+                taskName: task,
+                metadata: { pageUrl: resultData.pageUrl }
+              });
+            }
           }
         } else {
           setResult({
@@ -181,12 +180,15 @@ export default function Home() {
 
   const handleScreenshotSaving = (results: TaskResult[]) => {
     results.forEach((result) => {
-      if (result.taskType === 'screenshot' && result.data?.screenshot) {
-        ScreenshotManager.saveScreenshot({
-          url: `data:image/png;base64,${result.data.screenshot}`,
-          taskName: task,
-          metadata: { pageUrl: result.data.pageUrl }
-        });
+      if (result.taskType === 'screenshot' && result.data && typeof result.data === 'object') {
+        const data = result.data as { screenshot?: string; pageUrl?: string };
+        if (data.screenshot) {
+          ScreenshotManager.saveScreenshot({
+            url: `data:image/png;base64,${data.screenshot}`,
+            taskName: task,
+            metadata: { pageUrl: data.pageUrl }
+          });
+        }
       }
     });
   };
@@ -368,13 +370,13 @@ export default function Home() {
                     {result.errorMessage && (
                       <p className="text-red-400 text-sm mt-2">{result.errorMessage}</p>
                     )}
-                    {result.data && result.taskType !== 'chain' && (
+                    {result.data !== undefined && result.taskType !== 'chain' && (
                       <details className="mt-4">
                         <summary className="cursor-pointer text-sm text-purple-400 hover:text-purple-300">
                           View Data
                         </summary>
                         <pre className="mt-2 p-4 bg-slate-900/50 rounded-lg text-sm text-gray-300 overflow-x-auto">
-                          {JSON.stringify(result.data, null, 2)}
+                          {JSON.stringify(result.data as Record<string, unknown>, null, 2)}
                         </pre>
                       </details>
                     )}
@@ -535,5 +537,20 @@ export default function Home() {
         </div>
       )}
     </main>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-purple-400 animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Loading...</p>
+        </div>
+      </div>
+    }>
+      <HomeContent />
+    </Suspense>
   );
 }

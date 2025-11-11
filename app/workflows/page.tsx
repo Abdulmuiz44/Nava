@@ -13,14 +13,19 @@ import {
   Upload,
   Search,
   Zap,
-  Clock,
-  Tag
+  Clock
 } from 'lucide-react';
 import { WorkflowManager, Workflow } from '@/lib/workflow-manager';
 
 export default function WorkflowsPage() {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
-  const [templates, setTemplates] = useState<any[]>([]);
+  const [templates, setTemplates] = useState<Array<{
+    id: string;
+    name: string;
+    description: string;
+    tasks: string[];
+    tags?: string[];
+  }>>([]);
   const [editingWorkflow, setEditingWorkflow] = useState<Partial<Workflow> | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -106,7 +111,7 @@ export default function WorkflowsPage() {
     reader.readAsText(file);
   };
 
-  const handleUseTemplate = (template: any) => {
+  const handleUseTemplate = (template: { name: string; description: string; tasks: string[]; tags?: string[] }) => {
     setEditingWorkflow({
       name: template.name + ' (Copy)',
       description: template.description,
