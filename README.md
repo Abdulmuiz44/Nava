@@ -1,60 +1,119 @@
-# Nava Web - Browser Automation Platform
+# Nava - Intelligent Browser Automation Platform
 
-A production-ready Next.js application for intelligent browser automation with natural language commands. Built with TypeScript, React, Tailwind CSS, and Playwright.
+A complete browser automation platform with both web and CLI interfaces. Built with Next.js, TypeScript, React, Tailwind CSS, Playwright, and Python.
+
+## 📂 Project Structure
+
+This repository contains two main components:
+
+- **Web Application** (Root): Production-ready Next.js web interface at the repository root
+- **CLI Tool** (`nava-cli/`): Python-based command-line interface for browser automation
+
+Choose the interface that best fits your workflow!
 
 ## 🚀 Features
 
-- **Natural Language Commands**: Control browsers with simple English commands
-- **Smart Text-Based Clicking**: Click buttons and links by their visible text - no selectors needed!
-- **Intelligent Form Filling**: Fill forms by field labels automatically
-- **Multi-Step Workflows**: Chain multiple commands with commas for complex automation
+### Web Interface Features
+- **Beautiful Modern UI**: Responsive interface with Tailwind CSS
 - **Real-time Execution**: Instant task execution with live feedback
-- **Visible/Headless Toggle**: Watch automation or run in background
-- **Beautiful UI**: Modern, responsive interface with Tailwind CSS
-- **TypeScript**: Fully typed codebase for better development experience
-- **Playwright Integration**: Robust browser automation powered by Playwright
 - **API Routes**: RESTful API endpoints for programmatic access
-- **Vercel Ready**: Optimized for Vercel serverless deployment
+- **Vercel Ready**: Optimized for serverless deployment
+- **TypeScript**: Fully typed codebase for better development experience
+
+### CLI Features  
+- **Python-Based**: Powerful command-line automation tool
+- **Rich Terminal UI**: Interactive command-line interface
+- **Scheduling**: Automate tasks with built-in scheduler
+- **Workflow Management**: Create and execute complex automation workflows
+- **Integration Support**: Extensible integration system
+
+### Core Automation Features (Both Interfaces)
+- **Natural Language Commands**: Control browsers with simple English commands
+- **Smart Text-Based Clicking**: Click buttons and links by their visible text - no selectors needed
+- **Intelligent Form Filling**: Fill forms by field labels automatically
+- **Multi-Step Workflows**: Chain multiple commands for complex automation
+- **Visible/Headless Toggle**: Watch automation or run in background
+- **Playwright Integration**: Robust browser automation powered by Playwright
 
 ## 📋 Prerequisites
 
+### For Web Application
 - Node.js 18.17.0 or higher
-- npm or yarn package manager
-- Vercel account (for deployment)
+- pnpm, npm, or yarn package manager
+- Vercel account (optional, for deployment)
 
-## 🛠️ Local Development
+### For CLI Tool
+- Python 3.8 or higher
+- pip package manager
 
-### 1. Install Dependencies
+## 🛠️ Quick Start
+
+### Web Application (Next.js)
+
+The web application is now at the **root** of the repository.
+
+#### 1. Install Dependencies
 
 ```bash
-cd nava-web
+# Using pnpm (recommended)
+pnpm install
+
+# Or using npm
 npm install
 ```
 
-### 2. Install Playwright Browsers
+#### 2. Install Playwright Browsers
 
 ```bash
 npx playwright install chromium
 ```
 
-### 3. Run Development Server
+#### 3. Run Development Server
 
 ```bash
-npm run dev
+pnpm run dev
+# Or: npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## 📦 Build for Production
+### CLI Tool (Python)
+
+The CLI tool is located in the `nava-cli/` directory.
+
+#### 1. Navigate to CLI Directory
 
 ```bash
-npm run build
-npm start
+cd nava-cli
 ```
 
-## 🌐 Deploy to Vercel
+#### 2. Install Dependencies
 
-### Method 1: Vercel CLI
+```bash
+pip install -r requirements.txt
+```
+
+#### 3. Run CLI
+
+```bash
+python cli.py
+```
+
+For detailed CLI documentation, see `nava-cli/README_PRO.md`
+
+## 📦 Build for Production (Web App)
+
+```bash
+pnpm run build
+pnpm start
+# Or: npm run build && npm start
+```
+
+## 🌐 Deploy to Vercel (Web App)
+
+**Important**: The web application is now at the repository root, so deployment is simpler.
+
+### Method 1: Vercel CLI (Recommended)
 
 1. Install Vercel CLI:
 ```bash
@@ -66,7 +125,7 @@ npm i -g vercel
 vercel login
 ```
 
-3. Deploy:
+3. Deploy from the repository root:
 ```bash
 vercel
 ```
@@ -76,29 +135,33 @@ For production deployment:
 vercel --prod
 ```
 
-### Method 2: GitHub Integration
+### Method 2: GitHub Integration (Easiest)
 
 1. Push your code to GitHub
 2. Go to [vercel.com](https://vercel.com)
 3. Click "Import Project"
 4. Select your GitHub repository
-5. Configure:
-   - **Framework Preset**: Next.js
-   - **Build Command**: `npm run build`
-   - **Install Command**: `npm install && npx playwright install chromium`
-6. Click "Deploy"
+5. Vercel will auto-detect Next.js configuration
+6. Configure build settings (optional):
+   - **Framework Preset**: Next.js (auto-detected)
+   - **Root Directory**: `.` (leave as root)
+   - **Build Command**: `pnpm run build` or `npm run build`
+   - **Install Command**: `pnpm install && npx playwright install chromium`
+7. Click "Deploy"
 
 ### Method 3: Vercel Dashboard
 
 1. Go to [vercel.com/new](https://vercel.com/new)
 2. Import your Git repository
-3. Vercel will auto-detect Next.js
-4. Add build settings:
+3. Vercel will auto-detect Next.js from the root
+4. Add build settings if needed:
    ```
-   Build Command: npm run build
-   Install Command: npm install && npx playwright install chromium
+   Build Command: pnpm run build
+   Install Command: pnpm install && npx playwright install chromium
    ```
 5. Deploy
+
+**Note**: The `vercel.json` configuration is already set up at the repository root.
 
 ## ⚙️ Configuration
 
@@ -118,7 +181,25 @@ The `vercel.json` file is pre-configured with:
 - Extended timeout (300s) for long-running tasks
 - Playwright browser installation
 
-## 📚 API Documentation
+## 🎯 Which Interface Should You Use?
+
+### Use the **Web Application** if you:
+- Want a visual interface with real-time feedback
+- Need to deploy on Vercel or other serverless platforms
+- Prefer TypeScript/JavaScript ecosystem
+- Want easy API access for integrations
+- Need a production-ready web UI
+
+### Use the **CLI Tool** if you:
+- Prefer command-line interfaces
+- Need advanced scheduling capabilities
+- Want local Python-based automation
+- Need workflow management features
+- Want to integrate with Python scripts
+
+**Both interfaces share the same core automation features!**
+
+## 📚 API Documentation (Web App)
 
 ### Execute Single Task
 
@@ -300,8 +381,8 @@ For longer tasks, increase timeout in `vercel.json`:
 ## 📁 Project Structure
 
 ```
-nava-web/
-├── app/
+Nava/
+├── app/                          # Next.js app directory (Web App)
 │   ├── api/
 │   │   ├── execute/
 │   │   │   └── route.ts          # Single task execution API
@@ -310,16 +391,30 @@ nava-web/
 │   ├── globals.css               # Global styles
 │   ├── layout.tsx                # Root layout
 │   └── page.tsx                  # Home page
-├── lib/
+├── lib/                          # Web app utilities
 │   ├── browser.ts                # Browser session management
 │   └── task-executor.ts          # Task parsing and execution
-├── public/                       # Static assets
+├── nava-cli/                     # Python CLI Tool
+│   ├── cli.py                    # Main CLI entry point
+│   ├── browser.py                # Browser automation core
+│   ├── task_executor.py          # Task execution logic
+│   ├── scheduler.py              # Task scheduling
+│   ├── workflow.py               # Workflow management
+│   ├── integrations.py           # External integrations
+│   ├── api_server.py             # API server for CLI
+│   ├── setup.bat                 # Windows setup script
+│   ├── run.bat                   # Windows run script
+│   └── README_PRO.md             # CLI documentation
 ├── .env.example                  # Environment variables template
 ├── next.config.js                # Next.js configuration
-├── package.json                  # Dependencies
+├── package.json                  # Web app dependencies
+├── pnpm-lock.yaml                # pnpm lock file
 ├── tailwind.config.ts            # Tailwind CSS configuration
 ├── tsconfig.json                 # TypeScript configuration
-└── vercel.json                   # Vercel deployment configuration
+├── vercel.json                   # Vercel deployment configuration
+├── QUICKSTART.md                 # Quick start guide
+├── DEPLOYMENT.md                 # Detailed deployment guide
+└── README.md                     # This file
 ```
 
 ## 🚀 Performance Optimization
@@ -368,12 +463,20 @@ Add custom logging in API routes:
 console.log('Task executed:', result);
 ```
 
+## 📖 Additional Documentation
+
+- **[QUICKSTART.md](QUICKSTART.md)**: Fast 5-minute setup guide
+- **[DEPLOYMENT.md](DEPLOYMENT.md)**: Detailed Vercel deployment instructions
+- **[nava-cli/README_PRO.md](nava-cli/README_PRO.md)**: Complete CLI documentation
+- **[nava-cli/QUICKSTART.md](nava-cli/QUICKSTART.md)**: CLI quick start guide
+- **[MIGRATION-SUMMARY.md](MIGRATION-SUMMARY.md)**: Project restructuring notes
+
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
 ## 📄 License
@@ -383,20 +486,30 @@ MIT License - feel free to use this project for any purpose.
 ## 🆘 Support
 
 For issues and questions:
-- Open an issue on GitHub
+- Open an issue on [GitHub](https://github.com/Abdulmuiz44/Nava)
 - Check the troubleshooting section
-- Review Vercel deployment logs
+- Review Vercel deployment logs (for web app)
+- See CLI documentation for CLI-specific issues
 
 ## 🎉 Credits
 
-Built with:
+### Web Application
 - [Next.js 14](https://nextjs.org/)
 - [React 18](https://react.dev/)
 - [TypeScript](https://www.typescriptlang.org/)
 - [Tailwind CSS](https://tailwindcss.com/)
-- [Playwright](https://playwright.dev/)
 - [Lucide Icons](https://lucide.dev/)
+
+### CLI Tool
+- [Python](https://www.python.org/)
+- [Playwright](https://playwright.dev/)
+- [Rich](https://github.com/Textualize/rich) (for terminal UI)
+
+### Core
+- [Playwright](https://playwright.dev/) - Browser automation engine
 
 ---
 
-Made with ❤️ by the Nava Team
+**Made with ❤️ by Abdulmuiz44**
+
+⭐ Star this repo if you find it useful!

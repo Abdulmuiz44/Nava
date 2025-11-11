@@ -1,12 +1,21 @@
-# ⚡ Nava Web - Quick Start Guide
+# ⚡ Nava - Quick Start Guide
 
 Get your browser automation platform running in 5 minutes!
 
-## 🎯 Deploy to Vercel in 3 Commands
+## 📂 Two Interfaces Available
+
+- **Web App**: Modern Next.js interface (at repository root)
+- **CLI Tool**: Python-based command-line tool (in `nava-cli/` folder)
+
+---
+
+## 🌐 Web Application Quick Start
+
+### 🎯 Deploy to Vercel in 3 Commands
 
 ```bash
-cd nava-web
-npm install
+pnpm install
+npx playwright install chromium
 vercel
 ```
 
@@ -14,12 +23,14 @@ That's it! Your app will be live at `https://your-project.vercel.app`
 
 ---
 
-## 📦 Local Setup (Development)
+## 📦 Local Setup (Web Development)
+
+**Note**: The web app is now at the repository root (not in a subfolder).
 
 ### 1. Install Dependencies
 ```bash
-cd nava-web
-npm install
+pnpm install
+# Or: npm install
 ```
 
 ### 2. Install Playwright
@@ -29,10 +40,32 @@ npx playwright install chromium
 
 ### 3. Run Development Server
 ```bash
-npm run dev
+pnpm run dev
+# Or: npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) 🚀
+
+---
+
+## 🖥️ CLI Tool Quick Start
+
+### 1. Navigate to CLI Directory
+```bash
+cd nava-cli
+```
+
+### 2. Install Python Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Run CLI
+```bash
+python cli.py
+```
+
+For detailed CLI usage, see `nava-cli/README_PRO.md`
 
 ---
 
@@ -85,16 +118,21 @@ extract links
 ## 📁 Project Structure
 
 ```
-nava-web/
-├── app/
+Nava/
+├── app/                  # Web app (Next.js)
 │   ├── api/              # API routes
 │   ├── page.tsx          # Home page
 │   └── layout.tsx        # Root layout
-├── lib/
+├── lib/                  # Web utilities
 │   ├── browser.ts        # Browser automation
 │   └── task-executor.ts  # Task parsing
-├── package.json          # Dependencies
-└── vercel.json           # Deployment config
+├── nava-cli/             # Python CLI tool
+│   ├── cli.py            # CLI entry point
+│   ├── browser.py        # Browser core
+│   └── ...               # Other CLI files
+├── package.json          # Web dependencies
+├── vercel.json           # Deployment config
+└── README.md             # Full documentation
 ```
 
 ---
