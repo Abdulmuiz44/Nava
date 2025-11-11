@@ -8,20 +8,26 @@
 
 2. **Import your GitHub repository**
 
-3. **Configure Project Settings:**
-   - **Framework Preset**: Next.js
-   - **Root Directory**: Leave as `.` (root) - the vercel.json will handle it
-   - **Build Command**: `cd nava-web && npm run build`
-   - **Install Command**: `cd nava-web && npm install && npx playwright install chromium`
-   - **Output Directory**: `nava-web/.next`
+3. **⚠️ IMPORTANT: Configure Root Directory**
+   Click **"Edit"** next to Root Directory and set it to:
+   ```
+   nava-web
+   ```
 
-4. **Click "Deploy"**
+4. **Configure Project Settings:**
+   - **Framework Preset**: Next.js (auto-detected)
+   - **Root Directory**: `nava-web` ⚠️ (REQUIRED)
+   - **Build Command**: Leave default (`npm run build`)
+   - **Install Command**: `npm install && npx playwright install chromium`
+   - **Output Directory**: Leave default (`.next`)
 
-### Option 2: Using Vercel CLI
+5. **Click "Deploy"**
+
+### Option 2: Using Vercel CLI (From nava-web directory)
 
 ```bash
-# Make sure you're in the root directory
-cd /path/to/Nava
+# Navigate to the Next.js app directory
+cd nava-web
 
 # Deploy
 vercel
@@ -30,36 +36,43 @@ vercel
 vercel --prod
 ```
 
-The `vercel.json` at the root will automatically configure the build to use the `nava-web` folder.
+**Note:** Always run Vercel CLI from the `nava-web` directory to avoid configuration issues.
 
 ## 📝 Important Files
 
-- **`/vercel.json`** - Root configuration that tells Vercel to build from `nava-web`
 - **`/.vercelignore`** - Ignores Python CLI files during deployment
-- **`/nava-web/vercel.json`** - Next.js app-specific configuration (memory, timeout)
+- **`/nava-web/vercel.json`** - Next.js app configuration (memory, timeout for Playwright)
 
 ## 🔧 Troubleshooting
 
-### "Missing variable handler or app in file main.py"
+### "Could not identify Next.js version" or "Missing variable handler"
 
-This error occurs when Vercel tries to deploy the Python CLI files instead of the Next.js app.
+These errors occur when the **Root Directory** is not set correctly.
 
 **Solution:**
-1. Make sure the root `vercel.json` exists (it should)
-2. Make sure `.vercelignore` exists (it should)
-3. Redeploy from Vercel dashboard with the settings above
-4. Or use the CLI from the root directory
+1. Go to Vercel Dashboard → Your Project → **Settings** → **General**
+2. Find **Root Directory** section
+3. Click **Edit**
+4. Enter: `nava-web`
+5. Click **Save**
+6. Go to **Deployments** tab → Click **Redeploy**
 
-### If Deployment Still Fails
+### "No package.json found"
 
-**Alternative Method: Deploy from nava-web subdirectory**
+Make sure **Root Directory** is set to `nava-web` (see above).
 
-1. In Vercel Dashboard → Project Settings → General
-2. Set **Root Directory** to `nava-web`
-3. Set **Framework Preset** to Next.js
-4. Set **Build Command** to `npm run build`
-5. Set **Install Command** to `npm install && npx playwright install chromium`
-6. Redeploy
+### For Existing Deployments
+
+If you already deployed and it's failing:
+
+1. **Delete the deployment** (recommended for clean start)
+   - Go to Vercel Dashboard → Your Project
+   - Settings → General → Delete Project
+   - Re-import from GitHub with correct Root Directory
+
+2. **Or update settings:**
+   - Settings → General → Root Directory → `nava-web`
+   - Redeploy
 
 ## 🎯 Verify Deployment
 

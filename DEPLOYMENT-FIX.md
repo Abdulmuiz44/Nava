@@ -1,55 +1,57 @@
 # 🔧 Vercel Deployment Fix
 
 ## Problem
-Vercel was trying to deploy `main.py` (Python CLI) instead of the Next.js web app.
+Vercel errors:
+- `Missing variable 'handler' or 'app' in file "main.py"`
+- `Could not identify Next.js version`
 
-## Solution Applied
-Created configuration files to tell Vercel to deploy from the `nava-web` folder:
+**Root Cause:** Vercel is looking at the root directory which contains Python files, not the Next.js app in `nava-web` folder.
+
+## Solution
+Set **Root Directory** to `nava-web` in Vercel Dashboard.
 
 ### Files Created:
-1. **`/vercel.json`** - Root configuration
-2. **`/.vercelignore`** - Ignores Python files
-3. **`/VERCEL-DEPLOYMENT.md`** - Detailed deployment guide
+1. **`/.vercelignore`** - Ignores Python files during deployment
+2. **`/VERCEL-DEPLOYMENT.md`** - Detailed deployment guide
 
 ### Files Updated:
 1. **`/README.md`** - Added deployment warning
 
-## 🚀 Next Steps
+## 🚀 Fix Steps (Do This Now!)
 
-### 1. Commit and Push These Changes
+### Step 1: Go to Vercel Dashboard
 
-```bash
-git add .
-git commit -m "Fix Vercel deployment configuration"
-git push origin master
-```
+1. Visit [vercel.com/dashboard](https://vercel.com/dashboard)
+2. Click on your **Nava** project
 
-### 2. Redeploy in Vercel
+### Step 2: Update Root Directory
 
-**Option A: Automatic (if connected to GitHub)**
-- Vercel will auto-detect the push and redeploy
-- Wait 2-3 minutes for build to complete
+1. Click **Settings** (top menu)
+2. Click **General** (left sidebar)
+3. Scroll down to **Root Directory**
+4. Click **Edit**
+5. Enter: `nava-web`
+6. Click **Save**
 
-**Option B: Manual Redeploy**
-1. Go to [vercel.com/dashboard](https://vercel.com/dashboard)
-2. Select your project
-3. Click "Deployments"
-4. Click "Redeploy" on the latest deployment
+### Step 3: Redeploy
 
-**Option C: Fresh Deploy**
-1. Delete the current project in Vercel dashboard
-2. Create new deployment from GitHub
-3. Vercel will now use the correct configuration
+1. Click **Deployments** tab (top menu)
+2. Find the latest deployment
+3. Click **"..."** menu → **Redeploy**
+4. Wait for build to complete (2-3 minutes)
 
-### 3. Alternative: Set Root Directory in Dashboard
+### Alternative: Fresh Start (Recommended if issues persist)
 
-If automatic deployment still fails:
+1. **Delete the project:**
+   - Settings → General → Scroll to bottom
+   - Click **Delete Project**
+   - Confirm deletion
 
-1. Go to **Project Settings** → **General**
-2. Set **Root Directory** to `nava-web`
-3. Set **Framework Preset** to `Next.js`
-4. Click **Save**
-5. Redeploy
+2. **Re-import:**
+   - Go to [vercel.com/new](https://vercel.com/new)
+   - Import your GitHub repository
+   - ⚠️ **IMPORTANT:** Set **Root Directory** to `nava-web`
+   - Click Deploy
 
 ## ✅ Verify Deployment
 
