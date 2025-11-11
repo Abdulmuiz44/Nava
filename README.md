@@ -1,24 +1,47 @@
 # Nava - Intelligent Browser Automation Platform
 
-A complete browser automation platform with both web and CLI interfaces. Built with Next.js, TypeScript, React, Tailwind CSS, Playwright, and Python.
+A professional-grade browser automation platform with both web and CLI interfaces. Built with Next.js 14, TypeScript, React, Tailwind CSS, Playwright, and Python.
+
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/Abdulmuiz44/Nava)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black.svg)](https://nextjs.org)
+[![Playwright](https://img.shields.io/badge/Playwright-1.40+-green.svg)](https://playwright.dev)
 
 ## 📂 Project Structure
 
 This repository contains two main components:
 
-- **Web Application** (Root): Production-ready Next.js web interface at the repository root
+- **Web Application** (Root): Enterprise-ready Next.js web interface with advanced features
 - **CLI Tool** (`nava-cli/`): Python-based command-line interface for browser automation
 
 Choose the interface that best fits your workflow!
 
+## ✨ What's New in v2.0
+
+🎉 **Major Update**: Nava has been transformed into a professional-grade automation platform!
+
+### 🆕 New Features
+- 🔐 **API Key Authentication** - Secure your instance with optional API keys
+- ⚡ **8 New Task Types** - Scroll, hover, dropdown selection, text extraction, smart waits, tab switching, file upload, downloads
+- 📚 **Workflow Library** - Save, manage, and reuse automation workflows
+- 📸 **Screenshot Gallery** - Automatic screenshot management with visual gallery
+- 🔄 **Task History & Replay** - Persistent command history with one-click replay
+- 🎨 **Enhanced UI** - Modern navigation, better feedback, mobile responsive
+- 🛡️ **Production Ready** - TypeScript strict mode, comprehensive error handling, optimized builds
+
 ## 🚀 Features
 
 ### Web Interface Features
-- **Beautiful Modern UI**: Responsive interface with Tailwind CSS
+- **Modern Navigation Bar**: Quick access to Workflows, Screenshots, and Documentation
+- **Beautiful UI**: Responsive interface with Tailwind CSS and modern design
 - **Real-time Execution**: Instant task execution with live feedback
-- **API Routes**: RESTful API endpoints for programmatic access
+- **Workflow Management**: Save and reuse complex automation sequences
+- **Screenshot Gallery**: Visual gallery with lightbox, download, and metadata
+- **Task History**: Persistent history with replay functionality
+- **API Security**: Optional API key authentication for production deployments
+- **RESTful API**: Comprehensive API endpoints for programmatic access
 - **Vercel Ready**: Optimized for serverless deployment
-- **TypeScript**: Fully typed codebase for better development experience
+- **TypeScript**: Fully typed codebase with strict mode enabled
 
 ### CLI Features  
 - **Python-Based**: Powerful command-line automation tool
@@ -28,10 +51,13 @@ Choose the interface that best fits your workflow!
 - **Integration Support**: Extensible integration system
 
 ### Core Automation Features (Both Interfaces)
-- **Natural Language Commands**: Control browsers with simple English commands
-- **Smart Text-Based Clicking**: Click buttons and links by their visible text - no selectors needed
+- **Natural Language Commands**: Control browsers with simple English (26+ command types)
+- **Smart Text-Based Clicking**: Click buttons and links by their visible text
 - **Intelligent Form Filling**: Fill forms by field labels automatically
-- **Multi-Step Workflows**: Chain multiple commands for complex automation
+- **Multi-Step Workflows**: Chain multiple commands with comma separation
+- **Advanced Interactions**: Scroll, hover, select dropdowns, extract text, smart waits
+- **Tab Management**: Switch between browser tabs
+- **File Operations**: Upload files and capture downloads
 - **Visible/Headless Toggle**: Watch automation or run in background
 - **Playwright Integration**: Robust browser automation powered by Playwright
 
@@ -167,19 +193,39 @@ vercel --prod
 
 ### Environment Variables
 
-Create a `.env.local` file:
+Create a `.env.local` file in the root directory:
 
 ```env
+# Node Environment
 NODE_ENV=production
+
+# Playwright Configuration
 PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=0
+
+# API Security (set to 'none' to disable authentication)
+NAVA_API_KEY=your_secure_api_key_here
+
+# Optional: Rate Limiting
+MAX_REQUESTS_PER_MINUTE=60
+
+# Optional: Browser Configuration
+DEFAULT_TIMEOUT=30000
+MAX_CONCURRENT_SESSIONS=5
+
+# Optional: Features
+ENABLE_SCREENSHOTS=true
+ENABLE_FILE_UPLOAD=true
 ```
 
 ### Vercel Configuration
 
 The `vercel.json` file is pre-configured with:
-- Increased memory (3GB) for browser automation
-- Extended timeout (300s) for long-running tasks
-- Playwright browser installation
+- Optimized memory (2GB) for Hobby plan compatibility
+- Extended timeout (60s) for automation tasks
+- Playwright Chromium installation
+- Environment variable management
+
+**Note**: For production deployments requiring longer timeouts or more memory, consider upgrading to Vercel Pro plan.
 
 ## 🎯 Which Interface Should You Use?
 
@@ -201,14 +247,33 @@ The `vercel.json` file is pre-configured with:
 
 ## 📚 API Documentation (Web App)
 
+### Authentication
+
+All API endpoints support optional API key authentication via the `x-api-key` header:
+
+```bash
+curl -X POST http://localhost:3000/api/execute \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: your_api_key_here" \
+  -d '{"task": "go to github.com"}'
+```
+
+Set `NAVA_API_KEY=none` in `.env.local` to disable authentication.
+
 ### Execute Single Task
 
 **Endpoint**: `POST /api/execute`
 
+**Headers**:
+```
+Content-Type: application/json
+x-api-key: your_api_key (if authentication enabled)
+```
+
 **Request Body**:
 ```json
 {
-  "task": "go to github.com",
+  "task": "go to github.com, scroll down, screenshot",
   "headless": true
 }
 ```
@@ -219,8 +284,12 @@ The `vercel.json` file is pre-configured with:
   "success": true,
   "result": {
     "success": true,
-    "taskType": "navigation",
-    "detail": "Navigated to https://github.com"
+    "taskType": "screenshot",
+    "detail": "Screenshot captured successfully",
+    "data": {
+      "screenshot": "base64_encoded_image...",
+      "pageUrl": "https://github.com"
+    }
   },
   "timestamp": "2024-01-01T12:00:00.000Z"
 }
@@ -230,16 +299,23 @@ The `vercel.json` file is pre-configured with:
 
 **Endpoint**: `POST /api/execute-chain`
 
+**Headers**:
+```
+Content-Type: application/json
+x-api-key: your_api_key (if authentication enabled)
+```
+
 **Request Body**:
 ```json
 {
   "tasks": [
     "go to github.com",
-    "click button#search",
-    "type react in input"
+    "scroll down 500",
+    "hover over .menu",
+    "click search button",
+    "wait for #results to appear"
   ],
-  "headless": true,
-  "continueOnError": false
+  "headless": true
 }
 ```
 
@@ -255,7 +331,57 @@ The `vercel.json` file is pre-configured with:
 }
 ```
 
-## 🎯 Supported Commands
+### Get Workflow Templates
+
+**Endpoint**: `GET /api/workflows`
+
+**Headers**:
+```
+x-api-key: your_api_key (if authentication enabled)
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "templates": [
+    {
+      "id": "template_1",
+      "name": "Login Flow",
+      "description": "Standard login workflow",
+      "tasks": ["go to https://example.com", "click login button", ...],
+      "tags": ["authentication", "login"]
+    }
+  ]
+}
+```
+
+### Get Screenshots
+
+**Endpoint**: `GET /api/screenshots`
+
+**Headers**:
+```
+x-api-key: your_api_key (if authentication enabled)
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "screenshots": [
+    {
+      "filename": "screenshot_123.png",
+      "url": "/screenshots/screenshot_123.png",
+      "size": 245678,
+      "created": "2024-01-01T12:00:00.000Z"
+    }
+  ],
+  "count": 15
+}
+```
+
+## 🎯 Supported Commands (26+ Types)
 
 ### Navigation
 - `go to <url>` - Navigate to a URL
@@ -292,6 +418,82 @@ click Sign In
 click #submit-btn
 ```
 
+### Scrolling ✨ NEW
+- `scroll down` - Scroll down 500px
+- `scroll up` - Scroll up 500px
+- `scroll down <pixels>` - Scroll down custom amount
+- `scroll to top` - Scroll to page top
+- `scroll to bottom` - Scroll to page bottom
+- `scroll to <selector>` - Scroll to element
+
+**Examples:**
+```
+scroll down
+scroll down 1000
+scroll to top
+scroll to #footer
+```
+
+### Hovering ✨ NEW
+- `hover over <selector>` - Hover over element
+- `hover <selector>` - Hover over element
+
+**Examples:**
+```
+hover over .menu-item
+hover #dropdown-trigger
+```
+
+### Dropdown Selection ✨ NEW
+- `select "<option>" from <selector>` - Select dropdown option
+
+**Examples:**
+```
+select "United States" from #country
+select "Blue" from select[name="color"]
+```
+
+### Text Extraction ✨ NEW
+- `get text from <selector>` - Extract text from element
+- `extract text from <selector>` - Extract text from element
+
+**Examples:**
+```
+get text from h1
+extract text from .description
+```
+
+### Smart Waits ✨ NEW
+- `wait for <selector> to appear` - Wait for element
+- `wait for <selector> for <seconds> seconds` - Wait with timeout
+- `wait <seconds>` - Wait for duration
+
+**Examples:**
+```
+wait for #success to appear
+wait for .loading for 10 seconds
+wait 5
+```
+
+### Tab Management ✨ NEW
+- `switch to tab <index>` - Switch to browser tab (0-indexed)
+
+**Examples:**
+```
+switch to tab 0
+switch to tab 1
+```
+
+### File Operations ✨ NEW
+- `upload <filepath> to <selector>` - Upload file to input
+- `download` - Capture download event
+
+**Examples:**
+```
+upload /path/to/file.pdf to input[type="file"]
+download
+```
+
 ### Form Filling (Smart Label Detection)
 - `fill <field name> with <value>` - Fill by label text
 - `fill <selector> with <value>` - Fill by CSS selector
@@ -315,27 +517,20 @@ press Enter
 
 ### Data Extraction
 - `extract links` - Get all links from page
-- `screenshot` - Capture page screenshot
+- `screenshot` - Capture page screenshot (auto-saved to gallery)
 
 ### Complex Multi-Step Workflows
 Separate commands with commas to execute them in sequence:
 
 **Examples:**
 ```
-go to example.com, click menu, click login button
+go to example.com, scroll down, hover over button, click menu
 
-go to tradiaai.app, click menu, click login button, fill email with user@example.com, fill password with pass123, access my dashboard
+go to store.com, select "Blue" from #color, click add to cart, screenshot
 
-go to github.com, search repositories, extract links
-```
+go to form.com, fill name, wait for #confirmation to appear, screenshot
 
-### Wait Commands
-- `wait <seconds>` - Wait for specified duration
-
-**Examples:**
-```
-wait 5
-wait for 3 seconds
+go to github.com, scroll to bottom, extract links
 ```
 
 ## 🔧 Troubleshooting
@@ -350,7 +545,7 @@ npx playwright install --with-deps chromium
 
 ### Memory Issues on Vercel
 
-The configuration allocates 3GB memory. If you need more:
+The configuration is optimized for Vercel Hobby plan (2GB limit). For Pro plan:
 
 1. Upgrade your Vercel plan
 2. Adjust `vercel.json`:
@@ -358,25 +553,34 @@ The configuration allocates 3GB memory. If you need more:
 {
   "functions": {
     "app/api/**/*.ts": {
-      "memory": 3008
-    }
-  }
-}
-```
-
-### Timeout Issues
-
-For longer tasks, increase timeout in `vercel.json`:
-
-```json
-{
-  "functions": {
-    "app/api/**/*.ts": {
+      "memory": 3008,
       "maxDuration": 300
     }
   }
 }
 ```
+
+### Build Errors
+
+If you encounter ESLint or TypeScript errors:
+
+```bash
+# Run build locally to see errors
+pnpm run build
+
+# Common fixes already implemented:
+# - Suspense boundaries for useSearchParams
+# - TypeScript strict mode compliance
+# - ESLint rule compliance
+```
+
+### API Authentication Issues
+
+If API calls fail with 401:
+
+1. Check `NAVA_API_KEY` is set in `.env.local`
+2. Include `x-api-key` header in requests
+3. Or set `NAVA_API_KEY=none` to disable auth
 
 ## 📁 Project Structure
 
@@ -386,14 +590,27 @@ Nava/
 │   ├── api/
 │   │   ├── execute/
 │   │   │   └── route.ts          # Single task execution API
-│   │   └── execute-chain/
-│   │       └── route.ts          # Task chain execution API
+│   │   ├── execute-chain/
+│   │   │   └── route.ts          # Task chain execution API
+│   │   ├── workflows/            # ✨ NEW
+│   │   │   └── route.ts          # Workflow templates API
+│   │   └── screenshots/          # ✨ NEW
+│   │       └── route.ts          # Screenshot management API
+│   ├── workflows/                # ✨ NEW
+│   │   └── page.tsx              # Workflow management page
+│   ├── screenshots/              # ✨ NEW
+│   │   └── page.tsx              # Screenshot gallery page
 │   ├── globals.css               # Global styles
 │   ├── layout.tsx                # Root layout
-│   └── page.tsx                  # Home page
+│   └── page.tsx                  # Enhanced home page with all features
 ├── lib/                          # Web app utilities
-│   ├── browser.ts                # Browser session management
-│   └── task-executor.ts          # Task parsing and execution
+│   ├── browser.ts                # Browser session management (enhanced)
+│   ├── task-executor.ts          # Task parsing and execution (enhanced)
+│   ├── workflow-manager.ts       # ✨ NEW - Workflow storage & operations
+│   └── screenshot-manager.ts     # ✨ NEW - Screenshot storage & operations
+├── public/
+│   └── screenshots/              # ✨ NEW - Screenshot storage directory
+├── middleware.ts                 # ✨ NEW - API authentication middleware
 ├── nava-cli/                     # Python CLI Tool
 │   ├── cli.py                    # Main CLI entry point
 │   ├── browser.py                # Browser automation core
@@ -405,15 +622,19 @@ Nava/
 │   ├── setup.bat                 # Windows setup script
 │   ├── run.bat                   # Windows run script
 │   └── README_PRO.md             # CLI documentation
-├── .env.example                  # Environment variables template
+├── .env.example                  # Environment variables template (enhanced)
 ├── next.config.js                # Next.js configuration
 ├── package.json                  # Web app dependencies
 ├── pnpm-lock.yaml                # pnpm lock file
 ├── tailwind.config.ts            # Tailwind CSS configuration
-├── tsconfig.json                 # TypeScript configuration
-├── vercel.json                   # Vercel deployment configuration
+├── tsconfig.json                 # TypeScript configuration (strict mode)
+├── vercel.json                   # Vercel deployment config (optimized)
+├── netlify.toml                  # ✨ NEW - Netlify deployment config
 ├── QUICKSTART.md                 # Quick start guide
-├── DEPLOYMENT.md                 # Detailed deployment guide
+├── FEATURES.md                   # ✨ NEW - Detailed feature documentation
+├── QUICK-REFERENCE.md            # ✨ NEW - Command cheat sheet
+├── IMPLEMENTATION-COMPLETE.md    # ✨ NEW - Technical implementation details
+├── NEW-FEATURES-README.md        # ✨ NEW - v2.0 feature overview
 └── README.md                     # This file
 ```
 
@@ -441,10 +662,32 @@ Use the task chain API with parallel execution for multiple tasks.
 
 ## 🔒 Security Considerations
 
-1. **Rate Limiting**: Implement rate limiting to prevent abuse
-2. **Authentication**: Add API authentication for production
-3. **Input Validation**: Validate all user inputs
-4. **CORS**: Configure CORS for your domain
+### ✅ Implemented Security Features
+1. **API Key Authentication**: Optional middleware-based authentication (`middleware.ts`)
+2. **CORS Configuration**: Properly configured CORS headers
+3. **Input Validation**: TypeScript strict mode with comprehensive validation
+4. **Environment Variables**: Secure configuration management
+5. **Type Safety**: Full TypeScript coverage with strict mode
+
+### 🔐 Production Security Checklist
+1. **Set API Key**: Always set a strong `NAVA_API_KEY` in production
+2. **Enable HTTPS**: Vercel provides automatic HTTPS
+3. **Rate Limiting**: Consider implementing rate limiting middleware
+4. **Input Sanitization**: Validate all user inputs before processing
+5. **Error Handling**: Production error messages don't expose sensitive data
+6. **Monitoring**: Set up logging and monitoring for suspicious activity
+
+### 🛡️ API Security Best Practices
+```env
+# Production .env.local
+NAVA_API_KEY=use_a_strong_random_key_here_min_32_chars
+NODE_ENV=production
+```
+
+Always include the API key in requests:
+```bash
+curl -H "x-api-key: your_secure_key" https://your-app.vercel.app/api/execute
+```
 
 ## 📈 Monitoring
 
@@ -465,11 +708,25 @@ console.log('Task executed:', result);
 
 ## 📖 Additional Documentation
 
+### 📘 User Guides
 - **[QUICKSTART.md](QUICKSTART.md)**: Fast 5-minute setup guide
+- **[FEATURES.md](FEATURES.md)**: ✨ **NEW** - Complete feature guide with examples
+- **[QUICK-REFERENCE.md](QUICK-REFERENCE.md)**: ✨ **NEW** - Command cheat sheet
+- **[NEW-FEATURES-README.md](NEW-FEATURES-README.md)**: ✨ **NEW** - v2.0 release overview
+
+### 🔧 Technical Documentation
+- **[IMPLEMENTATION-COMPLETE.md](IMPLEMENTATION-COMPLETE.md)**: ✨ **NEW** - Technical implementation details
 - **[DEPLOYMENT.md](DEPLOYMENT.md)**: Detailed Vercel deployment instructions
+- **[MIGRATION-SUMMARY.md](MIGRATION-SUMMARY.md)**: Project restructuring notes
+
+### 🖥️ CLI Documentation
 - **[nava-cli/README_PRO.md](nava-cli/README_PRO.md)**: Complete CLI documentation
 - **[nava-cli/QUICKSTART.md](nava-cli/QUICKSTART.md)**: CLI quick start guide
-- **[MIGRATION-SUMMARY.md](MIGRATION-SUMMARY.md)**: Project restructuring notes
+
+### 🎯 Quick Links
+- **Web Pages**: Visit `/workflows` and `/screenshots` after running the app
+- **API Endpoints**: `/api/execute`, `/api/execute-chain`, `/api/workflows`, `/api/screenshots`
+- **Environment Config**: See `.env.example` for all configuration options
 
 ## 🤝 Contributing
 

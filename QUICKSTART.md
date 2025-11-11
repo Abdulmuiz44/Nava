@@ -1,10 +1,20 @@
 # ⚡ Nava - Quick Start Guide
 
-Get your browser automation platform running in 5 minutes!
+Get your professional-grade browser automation platform running in 5 minutes!
+
+## ✨ What's New in v2.0
+
+🎉 **Major Features Added:**
+- 🔐 API Key Authentication
+- ⚡ 8 New Task Types (scroll, hover, dropdown, wait, etc.)
+- 📚 Workflow Library (Save & Reuse)
+- 📸 Screenshot Gallery
+- 🔄 Task History with Replay
+- 🎨 Enhanced Modern UI
 
 ## 📂 Two Interfaces Available
 
-- **Web App**: Modern Next.js interface (at repository root)
+- **Web App**: Enterprise-ready Next.js interface with advanced features (at repository root)
 - **CLI Tool**: Python-based command-line tool (in `nava-cli/` folder)
 
 ---
@@ -45,6 +55,23 @@ pnpm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) 🚀
+
+### 4. Configure Environment (Optional)
+
+Create `.env.local` for API security:
+```bash
+# .env.local
+NAVA_API_KEY=your_secure_key_here
+# Or set to 'none' to disable authentication
+NAVA_API_KEY=none
+```
+
+### 5. Explore New Features
+
+Once running, visit:
+- **Main Page**: http://localhost:3000 - Enhanced automation interface
+- **Workflows**: http://localhost:3000/workflows - Save & manage workflows
+- **Screenshots**: http://localhost:3000/screenshots - View screenshot gallery
 
 ---
 
@@ -104,13 +131,44 @@ curl -X POST https://your-project.vercel.app/api/execute \
 
 ## 💡 Example Commands
 
+### Basic Commands
 Try these in the web interface:
 
 ```
 go to github.com
 search for react tutorials
-go to google.com
-extract links
+click login button
+fill email with user@test.com
+screenshot
+```
+
+### New Advanced Commands ✨
+```
+scroll down
+scroll down 1000
+hover over .menu
+select "United States" from #country
+get text from h1
+wait for #success to appear
+switch to tab 1
+```
+
+### Multi-Step Workflows
+```
+go to example.com, scroll down, hover over button, screenshot
+
+go to store.com, select "Blue" from #color, click add to cart
+
+go to form.com, fill name, wait for #confirmation, screenshot
+```
+
+### API Usage with Authentication
+```bash
+# With API key
+curl -X POST http://localhost:3000/api/execute \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: your_key_here" \
+  -d '{"task": "go to github.com, screenshot"}'
 ```
 
 ---
@@ -119,20 +177,28 @@ extract links
 
 ```
 Nava/
-├── app/                  # Web app (Next.js)
-│   ├── api/              # API routes
-│   ├── page.tsx          # Home page
-│   └── layout.tsx        # Root layout
-├── lib/                  # Web utilities
-│   ├── browser.ts        # Browser automation
-│   └── task-executor.ts  # Task parsing
-├── nava-cli/             # Python CLI tool
-│   ├── cli.py            # CLI entry point
-│   ├── browser.py        # Browser core
-│   └── ...               # Other CLI files
-├── package.json          # Web dependencies
-├── vercel.json           # Deployment config
-└── README.md             # Full documentation
+├── app/                       # Web app (Next.js)
+│   ├── api/
+│   │   ├── execute/           # Task execution API
+│   │   ├── execute-chain/     # Chain execution API
+│   │   ├── workflows/         # ✨ NEW - Workflow API
+│   │   └── screenshots/       # ✨ NEW - Screenshot API
+│   ├── workflows/             # ✨ NEW - Workflow page
+│   ├── screenshots/           # ✨ NEW - Gallery page
+│   ├── page.tsx               # Enhanced home page
+│   └── layout.tsx             # Root layout
+├── lib/                       # Web utilities
+│   ├── browser.ts             # Enhanced browser automation
+│   ├── task-executor.ts       # Enhanced task parsing
+│   ├── workflow-manager.ts    # ✨ NEW - Workflow management
+│   └── screenshot-manager.ts  # ✨ NEW - Screenshot management
+├── middleware.ts              # ✨ NEW - API authentication
+├── nava-cli/                  # Python CLI tool
+├── package.json               # Web dependencies
+├── vercel.json                # Deployment config (optimized)
+├── FEATURES.md                # ✨ NEW - Detailed features
+├── QUICK-REFERENCE.md         # ✨ NEW - Command cheat sheet
+└── README.md                  # Full documentation
 ```
 
 ---
@@ -141,19 +207,25 @@ Nava/
 
 ### Playwright Not Installing?
 ```bash
-npx playwright install --with-deps chromium
+npx playwright install chromium
 ```
 
-### Function Timeout?
-Upgrade to Vercel Pro for 300s timeout
+### Build Errors?
+```bash
+pnpm run build  # Check for TypeScript/ESLint errors
+```
 
-### Out of Memory?
-Increase memory in `vercel.json`:
+### API 401 Unauthorized?
+Set `NAVA_API_KEY=none` in `.env.local` or include `x-api-key` header
+
+### Vercel Memory Limit (Hobby Plan)?
+The app is optimized for 2GB. For Pro plan, adjust `vercel.json`:
 ```json
 {
   "functions": {
     "app/api/**/*.ts": {
-      "memory": 3008
+      "memory": 3008,
+      "maxDuration": 300
     }
   }
 }
@@ -163,20 +235,38 @@ Increase memory in `vercel.json`:
 
 ## 📚 Documentation
 
-- **Full README**: `README.md`
-- **Deployment Guide**: `DEPLOYMENT.md`
+### 📘 User Guides
+- **[README.md](README.md)**: Complete documentation
+- **[FEATURES.md](FEATURES.md)**: ✨ Feature guide with examples
+- **[QUICK-REFERENCE.md](QUICK-REFERENCE.md)**: ✨ Command cheat sheet
+
+### 🔧 Technical
+- **[IMPLEMENTATION-COMPLETE.md](IMPLEMENTATION-COMPLETE.md)**: ✨ Technical details
+- **[DEPLOYMENT.md](DEPLOYMENT.md)**: Deployment guide
+
+### 🎯 Quick Access
+- **Workflows**: http://localhost:3000/workflows
+- **Screenshots**: http://localhost:3000/screenshots
 - **API Docs**: In README.md
 
 ---
 
 ## 🎉 You're Ready!
 
-Your Nava automation platform is production-ready!
+Your Nava v2.0 automation platform is production-ready with:
+- ✅ 26+ command types
+- ✅ Workflow management
+- ✅ Screenshot gallery
+- ✅ Task history & replay
+- ✅ API authentication
+- ✅ Modern responsive UI
 
 **Next Steps:**
 1. ✅ Deploy to Vercel
-2. ✅ Test automation tasks
-3. ✅ Add custom domain (optional)
+2. ✅ Explore /workflows and /screenshots pages
+3. ✅ Try new advanced commands (scroll, hover, select, etc.)
+4. ✅ Save your first workflow
+5. ✅ Set up API key for production
 4. ✅ Monitor performance
 
 **Need Help?**
