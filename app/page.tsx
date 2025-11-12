@@ -25,6 +25,16 @@ import {
 import { WorkflowManager } from '@/lib/workflow-manager';
 import { ScreenshotManager } from '@/lib/screenshot-manager';
 
+const PUBLIC_API_KEY = process.env.NEXT_PUBLIC_NAVA_API_KEY;
+const API_HEADERS: Record<string, string> = PUBLIC_API_KEY && PUBLIC_API_KEY !== 'none'
+  ? {
+      'Content-Type': 'application/json',
+      'x-api-key': PUBLIC_API_KEY,
+    }
+  : {
+      'Content-Type': 'application/json',
+    };
+
 interface TaskResult {
   success: boolean;
   taskType: string;
@@ -86,9 +96,7 @@ function HomeContent() {
         
         const response = await fetch('/api/execute-chain', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { ...API_HEADERS },
           body: JSON.stringify({ tasks, headless: !showBrowser }),
         });
 
@@ -130,9 +138,7 @@ function HomeContent() {
         // Execute single task
         const response = await fetch('/api/execute', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { ...API_HEADERS },
           body: JSON.stringify({ task, headless: !showBrowser }),
         });
 
