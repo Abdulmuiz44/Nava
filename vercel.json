@@ -11,8 +11,6 @@
     }
   },
   "env": {
-    "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "0",
-    "PLAYWRIGHT_BROWSERS_PATH": "/tmp/playwright",
     "NODE_OPTIONS": "--max-old-space-size=2048"
   }
 }
