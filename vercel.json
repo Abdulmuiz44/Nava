@@ -11,6 +11,8 @@
     }
   },
   "env": {
+    "PLAYWRIGHT_BROWSERS_PATH": "0",
+    "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "0",
     "NODE_OPTIONS": "--max-old-space-size=2048"
   }
 }
