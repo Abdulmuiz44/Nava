@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import asyncio
+import os
 from typing import Any, Optional
 from pathlib import Path
 
@@ -17,6 +18,38 @@ try:
     import boto3
 except ImportError:
     boto3 = None
+
+try:
+    from browser_use import Agent, Browser, Controller
+    from browser_use.browser.context import BrowserContextConfig
+    BROWSER_USE_AVAILABLE = True
+except ImportError:
+    BROWSER_USE_AVAILABLE = False
+    Agent = None
+    Browser = None
+    Controller = None
+    BrowserContextConfig = None
+
+try:
+    from langchain_anthropic import ChatAnthropic
+    ANTHROPIC_AVAILABLE = True
+except ImportError:
+    ANTHROPIC_AVAILABLE = False
+    ChatAnthropic = None
+
+try:
+    from langchain_openai import ChatOpenAI
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OPENAI_AVAILABLE = False
+    ChatOpenAI = None
+
+try:
+    from langchain_ollama import ChatOllama
+    OLLAMA_AVAILABLE = True
+except ImportError:
+    OLLAMA_AVAILABLE = False
+    ChatOllama = None
 
 logger = logging.getLogger(__name__)
 
@@ -221,3 +254,204 @@ class IntegrationManager:
         if tasks:
             results = await asyncio.gather(*tasks, return_exceptions=True)
             logger.info(f"Integration results: {results}")
+
+
+# Browser Use Integration Classes
+
+class BrowserUseConfig:
+    """Configuration for Browser Use integration."""
+
+    def __init__(
+        self,
+        use_cloud: bool = False,
+        emulate_mobile: bool = False,
+        mobile_device: str = "iPhone 13 Pro",
+        headless: bool = False,
+    ):
+        self.use_cloud = use_cloud
+        self.emulate_mobile = emulate_mobile
+        self.mobile_device = mobile_device
+        self.headless = headless
+
+
+def get_llm_for_browser_use():
+    """Get the appropriate LLM for Browser Use based on available API keys."""
+    
+    # Try Anthropic Claude first (recommended)
+    anthropic_key = os.getenv("ANTHROPIC_API_KEY")
+    if anthropic_key and ANTHROPIC_AVAILABLE:
+        logger.info("Using Anthropic Claude for Browser Use")
+        return ChatAnthropic(
+            model="claude-3-5-sonnet-20241022",
+            api_key=anthropic_key,
+            timeout=25,
+            stop=None,
+        )
+    
+    # Try OpenAI GPT
+    openai_key = os.getenv("OPENAI_API_KEY")
+    if openai_key and OPENAI_AVAILABLE:
+        logger.info("Using OpenAI GPT for Browser Use")
+        return ChatOpenAI(
+            model="gpt-4o",
+            api_key=openai_key,
+            timeout=25,
+        )
+    
+    # Try Ollama (local, free)
+    ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+    ollama_model = os.getenv("OLLAMA_MODEL", "llama3")
+    if OLLAMA_AVAILABLE:
+        logger.info(f"Using Ollama ({ollama_model}) for Browser Use")
+        return ChatOllama(
+            model=ollama_model,
+            base_url=ollama_base_url,
+            timeout=25,
+        )
+    
+    raise ValueError(
+        "No LLM configuration found for Browser Use. "
+        "Please set ANTHROPIC_API_KEY, OPENAI_API_KEY, or run Ollama locally. "
+        "See .env.example for configuration details."
+    )
+
+
+async def create_browser_use_agent(
+    task: str,
+    config: Optional[BrowserUseConfig] = None,
+) -> Optional[Agent]:
+    """Create a Browser Use agent with the specified configuration."""
+    
+    if not BROWSER_USE_AVAILABLE:
+        logger.error("browser-use package not installed. Install with: pip install browser-use")
+        return None
+    
+    config = config or BrowserUseConfig()
+    
+    try:
+        # Get LLM
+        llm = get_llm_for_browser_use()
+        
+        # Configure browser context for mobile emulation if needed
+        browser_config = None
+        if config.emulate_mobile:
+            # Mobile device configurations
+            mobile_devices = {
+                "iPhone 13 Pro": {
+                    "viewport": {"width": 390, "height": 844},
+                    "device_scale_factor": 3,
+                    "is_mobile": True,
+                    "has_touch": True,
+                    "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1",
+                },
+                "iPhone 12": {
+                    "viewport": {"width": 390, "height": 844},
+                    "device_scale_factor": 3,
+                    "is_mobile": True,
+                    "has_touch": True,
+                    "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1",
+                },
+                "Pixel 7": {
+                    "viewport": {"width": 412, "height": 915},
+                    "device_scale_factor": 2.625,
+                    "is_mobile": True,
+                    "has_touch": True,
+                    "user_agent": "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36",
+                },
+                "iPad Pro": {
+                    "viewport": {"width": 1024, "height": 1366},
+                    "device_scale_factor": 2,
+                    "is_mobile": True,
+                    "has_touch": True,
+                    "user_agent": "Mozilla/5.0 (iPad; CPU OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1",
+                },
+            }
+            
+            device_config = mobile_devices.get(
+                config.mobile_device,
+                mobile_devices["iPhone 13 Pro"]  # Default to iPhone 13 Pro
+            )
+            
+            browser_config = BrowserContextConfig(
+                headless=config.headless,
+                disable_security=False,
+                extra_chromium_args=[
+                    "--disable-blink-features=AutomationControlled",
+                    "--disable-dev-shm-usage",
+                    "--no-sandbox",
+                ],
+            )
+            
+            logger.info(f"Mobile emulation enabled: {config.mobile_device}")
+        else:
+            browser_config = BrowserContextConfig(
+                headless=config.headless,
+                disable_security=False,
+            )
+        
+        # Create browser instance
+        browser = Browser(
+            config=browser_config,
+        )
+        
+        # Create agent
+        agent = Agent(
+            task=task,
+            llm=llm,
+            browser=browser,
+        )
+        
+        logger.info(f"Browser Use agent created successfully")
+        return agent
+        
+    except Exception as e:
+        logger.error(f"Failed to create Browser Use agent: {str(e)}")
+        return None
+
+
+async def execute_with_browser_use(
+    task: str,
+    config: Optional[BrowserUseConfig] = None,
+) -> dict[str, Any]:
+    """Execute a task using Browser Use agent."""
+    
+    if not BROWSER_USE_AVAILABLE:
+        return {
+            "success": False,
+            "error": "Browser Use not available. Install with: pip install browser-use",
+            "fallback": "playwright",
+        }
+    
+    try:
+        agent = await create_browser_use_agent(task, config)
+        
+        if not agent:
+            return {
+                "success": False,
+                "error": "Failed to create Browser Use agent",
+                "fallback": "playwright",
+            }
+        
+        # Execute the task
+        logger.info(f"Executing task with Browser Use: {task}")
+        result = await agent.run()
+        
+        # Extract results
+        history = result.history() if hasattr(result, "history") else []
+        final_result = result.final_result() if hasattr(result, "final_result") else str(result)
+        
+        return {
+            "success": True,
+            "result": final_result,
+            "history": history,
+            "screenshots": [],  # Browser Use handles screenshots internally
+            "errors": [],
+        }
+        
+    except Exception as e:
+        logger.error(f"Browser Use execution error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "fallback": "playwright",
+        }

@@ -5,11 +5,20 @@ from __future__ import annotations
 import re
 import json
 import logging
+import os
 from dataclasses import dataclass, field
 from typing import Literal, Any, Optional
 from urllib.parse import quote_plus
 
 from browser import BrowserSession
+
+# Import Browser Use integration
+try:
+    from integrations import execute_with_browser_use, BrowserUseConfig, BROWSER_USE_AVAILABLE
+except ImportError:
+    BROWSER_USE_AVAILABLE = False
+    execute_with_browser_use = None
+    BrowserUseConfig = None
 
 TaskType = Literal[
     "navigate",
@@ -83,6 +92,56 @@ _IF_PATTERN = re.compile(
 )
 
 logger = logging.getLogger(__name__)
+
+
+async def execute_task_with_browser_use(
+    prompt: str,
+    use_browser_use: bool = False,
+    mobile: bool = False,
+    headless: bool = False,
+) -> Optional[dict[str, Any]]:
+    """Try to execute task using Browser Use if enabled and available."""
+    
+    # Check if Browser Use is enabled and available
+    if not use_browser_use:
+        return None
+    
+    use_browser_use_env = os.getenv("USE_BROWSER_USE", "false").lower() == "true"
+    if not use_browser_use_env:
+        logger.info("Browser Use disabled via environment variable")
+        return None
+    
+    if not BROWSER_USE_AVAILABLE:
+        logger.warning("Browser Use not available, falling back to Playwright")
+        return None
+    
+    try:
+        logger.info(f"Attempting to execute with Browser Use: {prompt}")
+        
+        # Configure Browser Use
+        config = BrowserUseConfig(
+            use_cloud=os.getenv("BROWSER_USE_CLOUD", "false").lower() == "true",
+            emulate_mobile=mobile or os.getenv("ENABLE_MOBILE_EMULATION", "false").lower() == "true",
+            mobile_device=os.getenv("MOBILE_DEVICE", "iPhone 13 Pro"),
+            headless=headless,
+        )
+        
+        # Execute with Browser Use
+        result = await execute_with_browser_use(prompt, config)
+        
+        if result.get("success"):
+            logger.info("Browser Use execution successful")
+            return result
+        else:
+            logger.warning(f"Browser Use execution failed: {result.get('error')}")
+            if result.get("fallback") == "playwright":
+                logger.info("Falling back to Playwright")
+                return None
+            return result
+            
+    except Exception as e:
+        logger.error(f"Browser Use error: {str(e)}, falling back to Playwright")
+        return None
 
 
 async def execute_task(prompt: str, session: BrowserSession) -> TaskResult:
