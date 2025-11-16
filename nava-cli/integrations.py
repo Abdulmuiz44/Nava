@@ -21,14 +21,12 @@ except ImportError:
 
 try:
     from browser_use import Agent, Browser, Controller
-    from browser_use.browser.context import BrowserContextConfig
     BROWSER_USE_AVAILABLE = True
 except ImportError:
     BROWSER_USE_AVAILABLE = False
     Agent = None
     Browser = None
     Controller = None
-    BrowserContextConfig = None
 
 try:
     from langchain_anthropic import ChatAnthropic
@@ -332,37 +330,33 @@ async def create_browser_use_agent(
         # Get LLM
         llm = get_llm_for_browser_use()
         
-        # Configure browser context for mobile emulation if needed
-        browser_config = None
+        # Configure browser for mobile emulation if needed
+        browser_kwargs = {
+            "headless": config.headless,
+            "disable_security": False,
+        }
+        
         if config.emulate_mobile:
             # Mobile device configurations
             mobile_devices = {
                 "iPhone 13 Pro": {
                     "viewport": {"width": 390, "height": 844},
                     "device_scale_factor": 3,
-                    "is_mobile": True,
-                    "has_touch": True,
                     "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1",
                 },
                 "iPhone 12": {
                     "viewport": {"width": 390, "height": 844},
                     "device_scale_factor": 3,
-                    "is_mobile": True,
-                    "has_touch": True,
                     "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1",
                 },
                 "Pixel 7": {
                     "viewport": {"width": 412, "height": 915},
                     "device_scale_factor": 2.625,
-                    "is_mobile": True,
-                    "has_touch": True,
                     "user_agent": "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36",
                 },
                 "iPad Pro": {
                     "viewport": {"width": 1024, "height": 1366},
                     "device_scale_factor": 2,
-                    "is_mobile": True,
-                    "has_touch": True,
                     "user_agent": "Mozilla/5.0 (iPad; CPU OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1",
                 },
             }
@@ -372,27 +366,17 @@ async def create_browser_use_agent(
                 mobile_devices["iPhone 13 Pro"]  # Default to iPhone 13 Pro
             )
             
-            browser_config = BrowserContextConfig(
-                headless=config.headless,
-                disable_security=False,
-                extra_chromium_args=[
-                    "--disable-blink-features=AutomationControlled",
-                    "--disable-dev-shm-usage",
-                    "--no-sandbox",
-                ],
-            )
+            # Apply mobile configuration
+            browser_kwargs.update({
+                "viewport": device_config["viewport"],
+                "device_scale_factor": device_config["device_scale_factor"],
+                "user_agent": device_config["user_agent"],
+            })
             
             logger.info(f"Mobile emulation enabled: {config.mobile_device}")
-        else:
-            browser_config = BrowserContextConfig(
-                headless=config.headless,
-                disable_security=False,
-            )
         
         # Create browser instance
-        browser = Browser(
-            config=browser_config,
-        )
+        browser = Browser(**browser_kwargs)
         
         # Create agent
         agent = Agent(
@@ -406,6 +390,8 @@ async def create_browser_use_agent(
         
     except Exception as e:
         logger.error(f"Failed to create Browser Use agent: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return None
 
 
