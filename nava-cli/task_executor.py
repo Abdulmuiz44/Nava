@@ -182,10 +182,17 @@ async def execute_task(prompt: str, session: BrowserSession) -> TaskResult:
         if extract_match:
             items = extract_match.group("items").strip()
             url = extract_match.group("url").strip()
-            url = _ensure_url(url)
-            logger.info(f"Extracting '{items}' from: {url}")
-            await session.goto(url)
-            data = await _extract_data(session, items)
+            
+            # Check if user wants to extract from current page
+            if url.lower() in ["current page", "this page", "page", "here"]:
+                logger.info(f"Extracting '{items}' from current page")
+                data = await _extract_data(session, items)
+            else:
+                url = _ensure_url(url)
+                logger.info(f"Extracting '{items}' from: {url}")
+                await session.goto(url)
+                data = await _extract_data(session, items)
+            
             return TaskResult(
                 task_type="extract",
                 detail=f"Extracted {data.get('count', 0)} items: {items}",
