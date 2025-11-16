@@ -38,4 +38,18 @@ next-env.d.ts
 /playwright-report/
 /playwright/.cache/
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Screenshots (test artifacts)
+nava-cli/screenshot.png
+
 .vercel
