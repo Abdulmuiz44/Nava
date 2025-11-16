@@ -21,6 +21,13 @@ class BrowserConfig:
     navigation_timeout: float = 30000  # 30 seconds default
     element_timeout: float = 10000     # 10 seconds default
     keep_open: bool = False            # Keep browser open after session ends
+    # Mobile emulation settings
+    emulate_mobile: bool = False
+    mobile_device: str = "iPhone 13 Pro"
+    device_scale_factor: Optional[float] = None
+    is_mobile: Optional[bool] = None
+    has_touch: Optional[bool] = None
+    user_agent: Optional[str] = None
 
 
 class BrowserSession:
@@ -42,12 +49,75 @@ class BrowserSession:
             channel=self._config.channel,
             headless=self._config.headless,
         )
-        self._context = await self._browser.new_context(
-            viewport={
+        
+        # Configure context with mobile emulation if enabled
+        context_options = {
+            "viewport": {
                 "width": self._config.viewport_width,
                 "height": self._config.viewport_height,
             }
-        )
+        }
+        
+        if self._config.emulate_mobile:
+            # Mobile device presets
+            mobile_devices = {
+                "iPhone 13 Pro": {
+                    "viewport": {"width": 390, "height": 844},
+                    "device_scale_factor": 3,
+                    "is_mobile": True,
+                    "has_touch": True,
+                    "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1",
+                },
+                "iPhone 12": {
+                    "viewport": {"width": 390, "height": 844},
+                    "device_scale_factor": 3,
+                    "is_mobile": True,
+                    "has_touch": True,
+                    "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1",
+                },
+                "Pixel 7": {
+                    "viewport": {"width": 412, "height": 915},
+                    "device_scale_factor": 2.625,
+                    "is_mobile": True,
+                    "has_touch": True,
+                    "user_agent": "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36",
+                },
+                "iPad Pro": {
+                    "viewport": {"width": 1024, "height": 1366},
+                    "device_scale_factor": 2,
+                    "is_mobile": True,
+                    "has_touch": True,
+                    "user_agent": "Mozilla/5.0 (iPad; CPU OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1",
+                },
+            }
+            
+            device_config = mobile_devices.get(
+                self._config.mobile_device,
+                mobile_devices["iPhone 13 Pro"]  # Default to iPhone 13 Pro
+            )
+            
+            # Apply mobile device configuration
+            context_options.update({
+                "viewport": device_config["viewport"],
+                "device_scale_factor": device_config["device_scale_factor"],
+                "is_mobile": device_config["is_mobile"],
+                "has_touch": device_config["has_touch"],
+                "user_agent": device_config["user_agent"],
+            })
+            
+            print(f"Mobile emulation enabled: {self._config.mobile_device}")
+        
+        # Allow custom overrides
+        if self._config.device_scale_factor is not None:
+            context_options["device_scale_factor"] = self._config.device_scale_factor
+        if self._config.is_mobile is not None:
+            context_options["is_mobile"] = self._config.is_mobile
+        if self._config.has_touch is not None:
+            context_options["has_touch"] = self._config.has_touch
+        if self._config.user_agent is not None:
+            context_options["user_agent"] = self._config.user_agent
+        
+        self._context = await self._browser.new_context(**context_options)
         self._page = await self._context.new_page()
         return self
 
@@ -249,3 +319,44 @@ class BrowserSession:
 
     async def screenshot(self, path: str, *, full_page: bool = False) -> None:
         await self.page.screenshot(path=path, full_page=full_page)
+    
+    async def touch_tap(self, selector: str) -> None:
+        """Tap on an element (for mobile touch simulation)."""
+        try:
+            await self.page.wait_for_selector(selector, timeout=self._config.element_timeout)
+            # Use tap for touch events
+            await self.page.tap(selector)
+        except Exception as e:
+            raise Exception(f"Failed to tap '{selector}': {str(e)}")
+    
+    async def swipe(self, direction: str = "up", distance: int = 300) -> None:
+        """Simulate swipe gesture for mobile (up, down, left, right)."""
+        try:
+            # Get viewport size
+            viewport = self.page.viewport_size
+            if not viewport:
+                viewport = {"width": self._config.viewport_width, "height": self._config.viewport_height}
+            
+            # Calculate swipe coordinates
+            start_x = viewport["width"] // 2
+            start_y = viewport["height"] // 2
+            
+            if direction == "up":
+                end_x, end_y = start_x, start_y - distance
+            elif direction == "down":
+                end_x, end_y = start_x, start_y + distance
+            elif direction == "left":
+                end_x, end_y = start_x - distance, start_y
+            elif direction == "right":
+                end_x, end_y = start_x + distance, start_y
+            else:
+                raise ValueError(f"Invalid swipe direction: {direction}")
+            
+            # Perform swipe using touch events
+            await self.page.mouse.move(start_x, start_y)
+            await self.page.mouse.down()
+            await self.page.mouse.move(end_x, end_y, steps=10)
+            await self.page.mouse.up()
+            
+        except Exception as e:
+            raise Exception(f"Failed to swipe {direction}: {str(e)}")

@@ -61,6 +61,148 @@ Choose the interface that best fits your workflow!
 - **Visible/Headless Toggle**: Watch automation or run in background
 - **Playwright Integration**: Robust browser automation powered by Playwright
 
+## 🤖 Browser Use Integration (NEW!)
+
+Nava now supports **Browser Use** - an AI-powered browser automation agent that can execute complex tasks using natural language!
+
+### Key Features
+- **AI-Driven Automation**: Use LLMs (Claude, GPT-4, or Ollama) to intelligently navigate and interact with websites
+- **Mobile Emulation**: Simulate iPhone, Pixel, iPad devices with touch events and mobile viewports
+- **Smart Fallback**: Automatically falls back to Playwright if Browser Use is unavailable or fails
+- **Zero Configuration**: Works with or without API keys (supports local Ollama)
+- **Secure by Default**: API keys via environment variables, sandboxed execution
+
+### Supported LLM Providers
+1. **Anthropic Claude** (Recommended) - Best reasoning capabilities
+2. **OpenAI GPT-4** - Great performance and reliability
+3. **Ollama** (Local) - Free, runs on your machine, no API key needed
+
+### Quick Setup
+
+#### 1. Install Browser Use Dependencies
+```bash
+cd nava-cli
+pip install -r requirements.txt
+```
+
+#### 2. Configure LLM (Optional)
+Create a `.env` file or set environment variables:
+
+```bash
+# For Anthropic Claude (recommended)
+export USE_BROWSER_USE=true
+export ANTHROPIC_API_KEY=your_api_key_here
+
+# OR for OpenAI
+export USE_BROWSER_USE=true
+export OPENAI_API_KEY=your_api_key_here
+
+# OR for Ollama (local, free - no API key needed)
+export USE_BROWSER_USE=true
+# Ollama will auto-detect if running at http://localhost:11434
+```
+
+#### 3. Enable Mobile Emulation (Optional)
+```bash
+export ENABLE_MOBILE_EMULATION=true
+export MOBILE_DEVICE="iPhone 13 Pro"  # Options: iPhone 13 Pro, Pixel 7, iPad Pro
+```
+
+### Using Browser Use
+
+#### Via Python CLI
+```bash
+# Set environment variable
+export USE_BROWSER_USE=true
+
+# Run a task
+python nava-cli/test_browser_use.py --task "go to github.com and search for browser automation"
+
+# Run with mobile emulation
+python nava-cli/test_browser_use.py --task "scroll down on mobile twitter.com" --mobile
+
+# Run all integration tests
+python nava-cli/test_browser_use.py --all
+```
+
+#### Via API Server
+```bash
+# Start the Python API server
+cd nava-cli
+python api_server.py
+```
+
+Then send requests with Browser Use enabled:
+```bash
+curl -X POST http://localhost:8000/execute \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task": "go to example.com and take a screenshot",
+    "use_browser_use": true,
+    "mobile": false,
+    "headless": true
+  }'
+```
+
+#### Via Next.js Web API
+The web API automatically proxies to the Python backend when `useBrowserUse` is enabled:
+
+```javascript
+// Frontend code
+const response = await fetch('/api/execute', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    task: "Search for AI agents on GitHub",
+    useBrowserUse: true,
+    mobile: false,
+    headless: true
+  })
+});
+```
+
+### Browser Use vs Playwright
+
+| Feature | Browser Use | Playwright |
+|---------|-------------|------------|
+| AI-Driven | ✅ Yes | ❌ No |
+| Natural Language | ✅ Advanced | ✅ Basic |
+| Complex Reasoning | ✅ Yes | ❌ Limited |
+| Speed | 🟡 Moderate | ✅ Fast |
+| API Keys Required | 🟡 Optional | ✅ None |
+| Mobile Emulation | ✅ Yes | ✅ Yes |
+| Reliability | ✅ High (with fallback) | ✅ Very High |
+
+**Best Practice**: Enable Browser Use for complex, multi-step tasks that require reasoning. Use Playwright for simple, fast operations.
+
+### Security & Best Practices
+
+1. **API Keys**: Store in `.env` file, never commit to version control
+2. **Rate Limiting**: Browser Use respects LLM provider rate limits
+3. **Timeout**: Tasks automatically timeout after 60 seconds
+4. **Sandboxing**: All executions run in isolated browser contexts
+5. **Fallback**: System automatically falls back to Playwright on errors
+
+### Troubleshooting
+
+**Browser Use not working?**
+- Check `USE_BROWSER_USE=true` is set
+- Verify API key is configured (or Ollama is running)
+- Check logs: `tail -f nava-cli/*.log`
+- Test with: `python nava-cli/test_browser_use.py --all`
+
+**No LLM provider available?**
+Install Ollama for free local LLM:
+```bash
+# Install Ollama (https://ollama.ai)
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# Pull a model
+ollama pull llama3
+
+# Ollama will auto-start at http://localhost:11434
+```
+
 ## 📋 Prerequisites
 
 ### For Web Application

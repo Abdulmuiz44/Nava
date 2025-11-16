@@ -33,6 +33,8 @@ class TaskRequest(BaseModel):
     headless: bool = False
     timeout: float = 30.0
     screenshot: Optional[str] = None
+    use_browser_use: bool = False
+    mobile: bool = False
 
 
 class ChainRequest(BaseModel):
@@ -43,6 +45,8 @@ class ChainRequest(BaseModel):
     headless: bool = False
     continue_on_error: bool = False
     timeout: float = 30.0
+    use_browser_use: bool = False
+    mobile: bool = False
 
 
 class TaskResponse(BaseModel):
@@ -116,10 +120,36 @@ class APIServer:
         timestamp = datetime.utcnow().isoformat()
 
         try:
+            # Try Browser Use first if enabled
+            if request.use_browser_use:
+                from task_executor import execute_task_with_browser_use
+                
+                browser_use_result = await execute_task_with_browser_use(
+                    prompt=request.task,
+                    use_browser_use=True,
+                    mobile=request.mobile,
+                    headless=request.headless,
+                )
+                
+                if browser_use_result and browser_use_result.get("success"):
+                    return TaskResponse(
+                        id=task_id,
+                        success=True,
+                        task_type="browser_use",
+                        detail=browser_use_result.get("result", "Task completed"),
+                        data={
+                            "history": browser_use_result.get("history", []),
+                            "screenshots": browser_use_result.get("screenshots", []),
+                        },
+                        timestamp=timestamp,
+                    )
+            
+            # Fallback to Playwright
             config = BrowserConfig(
                 browser_type="chromium" if request.browser == "chrome" else request.browser,
                 channel=request.browser if request.browser == "chrome" else None,
                 headless=request.headless,
+                emulate_mobile=request.mobile,
             )
 
             async with BrowserSession(config) as session:
