@@ -25,7 +25,7 @@ export interface AutomationTask {
 
 export interface AutomationResult {
   success: boolean;
-  data?: any;
+  data?: unknown;
   error?: string;
   pageUrl?: string;
   pageTitle?: string;

@@ -5,7 +5,7 @@
 
 interface MCPInstruction {
   type: string;
-  params: Record<string, any>;
+  params: Record<string, unknown>;
 }
 
 interface MCPTask {
@@ -19,7 +19,7 @@ interface MCPResponse {
     results: Array<{
       instruction: string;
       success: boolean;
-      data?: any;
+      data?: unknown;
       error?: string;
     }>;
     pageUrl: string;
@@ -154,7 +154,7 @@ export class MCPClient {
       let data: MCPResponse;
       try {
         data = await response.json();
-      } catch (parseError) {
+      } catch {
         throw new MCPClientError(
           `Invalid JSON response from MCP server`,
           response.status
@@ -219,7 +219,7 @@ export class MCPClientError extends Error {
  */
 export const createInstruction = (
   type: string,
-  params: Record<string, any>
+  params: Record<string, unknown>
 ): MCPInstruction => ({
   type,
   params,
