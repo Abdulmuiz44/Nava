@@ -1,0 +1,30 @@
+{
+  "name": "nava-playwright-mcp-server",
+  "version": "1.0.0",
+  "description": "Playwright MCP Browser Worker for Nava - Remote Browser Automation Backend",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "install-browsers": "playwright install chromium --with-deps"
+  },
+  "keywords": [
+    "playwright",
+    "mcp",
+    "browser-automation",
+    "nava"
+  ],
+  "author": "Nava Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "playwright": "^1.40.0",
+    "compression": "^1.7.4",
+    "helmet": "^7.1.0"
+  },
+  "engines": {
+    "node": ">=18.17.0"
+  }
+}

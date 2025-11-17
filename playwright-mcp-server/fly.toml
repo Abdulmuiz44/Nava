@@ -1,0 +1,44 @@
+# ===================================================================
+# Fly.io Configuration for Nava Playwright MCP Server
+# Optimized for Free Tier
+# ===================================================================
+
+app = "nava-playwright-mcp"
+
+kill_signal = "SIGINT"
+kill_timeout = 10
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "8080"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 100
+    hard_limit = 150
+
+[[http_service.checks]]
+  grace_period = "30s"
+  interval = "15s"
+  method = "GET"
+  timeout = "5s"
+  path = "/health"
+
+[metrics]
+  port = 9091
+  path = "/metrics"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 512
