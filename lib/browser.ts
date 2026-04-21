@@ -509,6 +509,77 @@ export class BrowserSession {
     }
   }
 
+
+  async waitForText(text: string, timeout?: number): Promise<TaskResult> {
+    if (!this.page) {
+      throw new Error('Browser session not initialized');
+    }
+
+    try {
+      await this.page.waitForSelector(`text=${JSON.stringify(text)}`, {
+        timeout: timeout ?? this.config.elementTimeout,
+        state: 'visible',
+      });
+
+      return {
+        success: true,
+        taskType: 'wait',
+        detail: `Text appeared: ${text}`,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        taskType: 'wait',
+        detail: `Text did not appear: ${text}`,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  async back(): Promise<TaskResult> {
+    if (!this.page) {
+      throw new Error('Browser session not initialized');
+    }
+
+    try {
+      await this.page.goBack({ waitUntil: 'domcontentloaded', timeout: this.config.navigationTimeout });
+      return {
+        success: true,
+        taskType: 'navigation',
+        detail: 'Navigated back',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        taskType: 'navigation',
+        detail: 'Failed to navigate back',
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  async refresh(): Promise<TaskResult> {
+    if (!this.page) {
+      throw new Error('Browser session not initialized');
+    }
+
+    try {
+      await this.page.reload({ waitUntil: 'domcontentloaded', timeout: this.config.navigationTimeout });
+      return {
+        success: true,
+        taskType: 'navigation',
+        detail: 'Page refreshed',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        taskType: 'navigation',
+        detail: 'Failed to refresh page',
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
   async switchToTab(tabIndex: number): Promise<TaskResult> {
     if (!this.context) {
       throw new Error('Browser context not initialized');
