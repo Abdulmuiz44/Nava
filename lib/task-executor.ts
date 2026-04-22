@@ -1,13 +1,41 @@
 import { BrowserSession, TaskResult } from './browser';
 
+export interface TaskExecutionLifecycleContext {
+  runId?: string;
+  onTaskStart?: (task: string) => Promise<void> | void;
+  onTaskComplete?: (task: string, result: TaskResult) => Promise<void> | void;
+  onTaskError?: (task: string, error: unknown) => Promise<void> | void;
+}
+
 export class TaskExecutor {
   private session: BrowserSession;
+  private lifecycle?: TaskExecutionLifecycleContext;
 
-  constructor(session: BrowserSession) {
+  constructor(session: BrowserSession, lifecycle?: TaskExecutionLifecycleContext) {
     this.session = session;
+    this.lifecycle = lifecycle;
   }
 
   async executeTask(task: string): Promise<TaskResult> {
+    if (this.lifecycle?.onTaskStart) {
+      await this.lifecycle.onTaskStart(task);
+    }
+
+    try {
+      const result = await this.executeTaskInternal(task);
+      if (this.lifecycle?.onTaskComplete) {
+        await this.lifecycle.onTaskComplete(task, result);
+      }
+      return result;
+    } catch (error) {
+      if (this.lifecycle?.onTaskError) {
+        await this.lifecycle.onTaskError(task, error);
+      }
+      throw error;
+    }
+  }
+
+  private async executeTaskInternal(task: string): Promise<TaskResult> {
     const normalizedTask = task.toLowerCase().trim();
 
     // Navigate tasks
@@ -295,12 +323,20 @@ export class TaskExecutor {
   }
 }
 
-export async function executeTask(task: string, session: BrowserSession): Promise<TaskResult> {
-  const executor = new TaskExecutor(session);
+export async function executeTask(
+  task: string,
+  session: BrowserSession,
+  lifecycle?: TaskExecutionLifecycleContext
+): Promise<TaskResult> {
+  const executor = new TaskExecutor(session, lifecycle);
   return await executor.executeTask(task);
 }
 
-export async function executeTaskChain(tasks: string[], session: BrowserSession): Promise<TaskResult[]> {
-  const executor = new TaskExecutor(session);
+export async function executeTaskChain(
+  tasks: string[],
+  session: BrowserSession,
+  lifecycle?: TaskExecutionLifecycleContext
+): Promise<TaskResult[]> {
+  const executor = new TaskExecutor(session, lifecycle);
   return await executor.executeChain(tasks);
 }

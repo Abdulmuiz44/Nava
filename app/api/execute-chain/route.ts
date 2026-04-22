@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { BrowserSession } from '@/lib/browser';
-import { executeTaskChain } from '@/lib/task-executor';
+import { executeRunById, getRunService } from '@/lib/agent-run/runtime';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -13,8 +12,6 @@ interface ExecuteChainRequest {
 }
 
 export async function POST(request: NextRequest) {
-  let session: BrowserSession | null = null;
-
   try {
     const body: ExecuteChainRequest = await request.json();
     const { tasks, headless = true } = body;
@@ -26,37 +23,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Initialize browser session
-    session = new BrowserSession({ headless });
-    await session.initialize();
+    const service = getRunService();
+    const run = await service.createRun({
+      context: {
+        tasks,
+        headless,
+      },
+    });
 
-    // Execute the task chain
-    const results = await executeTaskChain(tasks, session);
-
-    // Close browser session
-    await session.close();
+    const execution = await executeRunById(run.id);
+    const results = execution.results ?? [];
 
     const allSuccessful = results.every(r => r.success);
 
     return NextResponse.json({
-      success: allSuccessful,
+      success: execution.success && allSuccessful,
       results,
       totalTasks: tasks.length,
       successfulTasks: results.filter(r => r.success).length,
       failedTasks: results.filter(r => !r.success).length,
+      runId: run.id,
       timestamp: new Date().toISOString(),
     });
 
   } catch (error) {
     console.error('Chain execution error:', error);
-
-    if (session) {
-      try {
-        await session.close();
-      } catch (closeError) {
-        console.error('Error closing session:', closeError);
-      }
-    }
 
     return NextResponse.json(
       {

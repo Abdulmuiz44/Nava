@@ -13,6 +13,7 @@ export class MemoryAdapter<TRecord extends StorageRecord = StorageRecord>
   private state: StorageState<TRecord> = {
     'agent-runs': [],
     'run-events': [],
+    'run-snapshots': [],
     'api-keys': [],
   };
 
@@ -97,6 +98,7 @@ export class MemoryAdapter<TRecord extends StorageRecord = StorageRecord>
     this.state = {
       'agent-runs': [],
       'run-events': [],
+      'run-snapshots': [],
       'api-keys': [],
     };
   }
