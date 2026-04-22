@@ -1,6 +1,7 @@
 export const STORAGE_COLLECTIONS = {
   AGENT_RUNS: 'agent-runs',
   RUN_EVENTS: 'run-events',
+  RUN_SNAPSHOTS: 'run-snapshots',
   API_KEYS: 'api-keys',
 } as const;
 
@@ -11,7 +12,7 @@ export type StoragePrimitive = string | number | boolean | null;
 export type StorageValue =
   | StoragePrimitive
   | StorageValue[]
-  | { [key: string]: StorageValue };
+  | { [key: string]: unknown };
 
 export type StorageRecord = {
   id: string;

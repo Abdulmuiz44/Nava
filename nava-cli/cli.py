@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import os
 import sys
 import json
 from pathlib import Path
@@ -14,6 +15,7 @@ from task_executor import execute_task, execute_task_chain
 from workflow import load_workflow, save_workflow, expand_variables, WorkflowConfig
 from integrations import IntegrationManager
 from scheduler import ScheduleManager, RetryManager
+from web_api_client import WebApiClient
 
 _BROWSER_MAP: Mapping[str, tuple[str, Optional[str]]] = {
     "chrome": ("chromium", "chrome"),
@@ -144,6 +146,9 @@ EXAMPLES:
     parser.add_argument("--api", action="store_true", help="Start API server")
     parser.add_argument("--port", type=int, default=8000, help="API port")
     parser.add_argument("--host", type=str, default="0.0.0.0", help="API host")
+    parser.add_argument("--remote", action="store_true", help="Execute using Nava Web API")
+    parser.add_argument("--api-base-url", type=str, help="Nava Web API base URL (e.g., http://localhost:3000)")
+    parser.add_argument("--api-key", type=str, help="API key for Nava Web API (falls back to NAVA_API_KEY)")
 
     return parser
 
@@ -190,6 +195,7 @@ async def _run_tasks(
     tasks: list[str],
     config: BrowserConfig,
     integrations: IntegrationManager,
+    remote_client: Optional[WebApiClient] = None,
     variables: dict = None,
     continue_on_error: bool = False,
     screenshot: Optional[Path] = None,
@@ -209,17 +215,26 @@ async def _run_tasks(
     retry_manager = RetryManager(max_retries=retries - 1)
     results = []
 
-    try:
-        async with BrowserSession(config) as session:
-            for i, task in enumerate(expanded_tasks, 1):
-                print(_info(f"[{i}/{len(expanded_tasks)}] {task}"))
-
-                async def execute_wrapper():
-                    return await execute_task(task, session)
-
-                result = await retry_manager.execute_with_retry(execute_wrapper)
-
-                if result:
+    if remote_client:
+        try:
+            if len(expanded_tasks) == 1:
+                result = await asyncio.to_thread(
+                    remote_client.execute_task,
+                    expanded_tasks[0],
+                    config.headless,
+                )
+                results.append(result)
+                if result.success:
+                    print(_success(f"Completed: {result.detail}"))
+                else:
+                    print(_error(f"Failed: {result.error_message}"))
+            else:
+                chain_results = await asyncio.to_thread(
+                    remote_client.execute_chain,
+                    expanded_tasks,
+                    config.headless,
+                )
+                for result in chain_results:
                     results.append(result)
                     if result.success:
                         print(_success(f"Completed: {result.detail}"))
@@ -227,16 +242,38 @@ async def _run_tasks(
                         print(_error(f"Failed: {result.error_message}"))
                         if not continue_on_error:
                             break
+        except Exception as e:
+            print(_error(f"Remote API error: {str(e)}"))
+            return False
+    else:
+        try:
+            async with BrowserSession(config) as session:
+                for i, task in enumerate(expanded_tasks, 1):
+                    print(_info(f"[{i}/{len(expanded_tasks)}] {task}"))
 
-            # Save screenshot if requested
-            if screenshot:
-                screenshot.parent.mkdir(parents=True, exist_ok=True)
-                await session.screenshot(str(screenshot))
-                print(_info(f"Screenshot saved: {screenshot}"))
+                    async def execute_wrapper():
+                        return await execute_task(task, session)
 
-    except Exception as e:
-        print(_error(f"Error: {str(e)}"))
-        return False
+                    result = await retry_manager.execute_with_retry(execute_wrapper)
+
+                    if result:
+                        results.append(result)
+                        if result.success:
+                            print(_success(f"Completed: {result.detail}"))
+                        else:
+                            print(_error(f"Failed: {result.error_message}"))
+                            if not continue_on_error:
+                                break
+
+                # Save screenshot if requested
+                if screenshot:
+                    screenshot.parent.mkdir(parents=True, exist_ok=True)
+                    await session.screenshot(str(screenshot))
+                    print(_info(f"Screenshot saved: {screenshot}"))
+
+        except Exception as e:
+            print(_error(f"Error: {str(e)}"))
+            return False
 
     # Save results
     if json_output:
@@ -288,6 +325,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.s3:
         integrations.set_s3(args.s3)
 
+    remote_base_url = args.api_base_url or os.getenv("NAVA_API_BASE_URL")
+    remote_api_key = args.api_key or os.getenv("NAVA_API_KEY")
+    remote_client: Optional[WebApiClient] = None
+    if args.remote or remote_base_url:
+        if not remote_base_url:
+            print(_error("Remote mode requested but no API base URL was provided."))
+            print(_info("Set --api-base-url or NAVA_API_BASE_URL."))
+            return 1
+        remote_client = WebApiClient(base_url=remote_base_url, api_key=remote_api_key)
+
     # API mode
     if args.api:
         try:
@@ -308,7 +355,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             async def scheduled_task():
                 config = _config_from_choice(args.browser, headless=args.headless, nav_timeout=args.nav_timeout, element_timeout=args.element_timeout, keep_open=args.keep_open)
                 tasks = _parse_task_chain(args.prompt or "")
-                await _run_tasks(tasks, config, integrations)
+                await _run_tasks(tasks, config, integrations, remote_client=remote_client)
 
             schedule_mgr.schedule_task("main_task", scheduled_task, args.schedule)
 
@@ -340,8 +387,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     tasks,
                     config,
                     integrations,
-                    variables,
-                    args.continue_on_error,
+                    remote_client=remote_client,
+                    variables=variables,
+                    continue_on_error=args.continue_on_error,
                     screenshot=Path(workflow.screenshot) if workflow.screenshot else None,
                     json_output=args.json_output,
                     retries=workflow.retries,
@@ -396,8 +444,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             tasks,
             config,
             integrations,
-            variables,
-            args.continue_on_error,
+            remote_client=remote_client,
+            variables=variables,
+            continue_on_error=args.continue_on_error,
             screenshot=args.screenshot,
             json_output=args.json_output,
             retries=args.retries,
@@ -413,6 +462,15 @@ async def _interactive_session(args, integrations: IntegrationManager) -> int:
     import time
     from datetime import datetime
     import math
+
+    remote_base_url = args.api_base_url or os.getenv("NAVA_API_BASE_URL")
+    remote_api_key = args.api_key or os.getenv("NAVA_API_KEY")
+    remote_client: Optional[WebApiClient] = None
+    if args.remote or remote_base_url:
+        if not remote_base_url:
+            print(_error("Remote mode requires --api-base-url or NAVA_API_BASE_URL."))
+            return 1
+        remote_client = WebApiClient(base_url=remote_base_url, api_key=remote_api_key)
     
     # Session state
     session = {
@@ -696,7 +754,7 @@ async def _interactive_session(args, integrations: IntegrationManager) -> int:
             start_time = time.time()
             print(f"\r  {_tcolorize('⚡ In progress...', ThemeColors.WARNING)}", end="", flush=True)
             
-            success = await _run_tasks(tasks, config, integrations)
+            success = await _run_tasks(tasks, config, integrations, remote_client=remote_client)
             execution_time = time.time() - start_time
             
             # Show results with beautiful animations

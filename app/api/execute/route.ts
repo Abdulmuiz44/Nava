@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { BrowserSession } from '@/lib/browser';
-import { executeTask } from '@/lib/task-executor';
+import { executeRunById, getRunService } from '@/lib/agent-run/runtime';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -12,8 +11,6 @@ interface ExecuteRequest {
 }
 
 export async function POST(request: NextRequest) {
-  let session: BrowserSession | null = null;
-
   try {
     const body: ExecuteRequest = await request.json();
     const { task, headless = true } = body;
@@ -25,32 +22,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Initialize browser session
-    session = new BrowserSession({ headless });
-    await session.initialize();
+    const service = getRunService();
+    const run = await service.createRun({
+      context: {
+        task,
+        headless,
+      },
+    });
 
-    // Execute the task
-    const result = await executeTask(task, session);
-
-    // Close browser session
-    await session.close();
+    const execution = await executeRunById(run.id);
+    const result = execution.result;
 
     return NextResponse.json({
-      success: result.success,
+      success: execution.success,
       result,
+      runId: run.id,
       timestamp: new Date().toISOString(),
     });
 
   } catch (error) {
     console.error('Execution error:', error);
-
-    if (session) {
-      try {
-        await session.close();
-      } catch (closeError) {
-        console.error('Error closing session:', closeError);
-      }
-    }
 
     return NextResponse.json(
       {

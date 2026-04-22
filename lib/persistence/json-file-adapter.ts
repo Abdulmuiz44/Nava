@@ -154,6 +154,7 @@ export class JsonFileAdapter<TRecord extends StorageRecord = StorageRecord>
     return {
       'agent-runs': parsed['agent-runs'] ?? [],
       'run-events': parsed['run-events'] ?? [],
+      'run-snapshots': parsed['run-snapshots'] ?? [],
       'api-keys': parsed['api-keys'] ?? [],
     };
   }
@@ -175,6 +176,7 @@ export class JsonFileAdapter<TRecord extends StorageRecord = StorageRecord>
     return {
       'agent-runs': [],
       'run-events': [],
+      'run-snapshots': [],
       'api-keys': [],
     };
   }
